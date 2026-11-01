@@ -733,7 +733,9 @@ function renderSettings(){
   h+='<div class="card"><h3>Nouveau critère</h3><div class="field"><label class="lab" for="nc-label">Question</label><input class="in" id="nc-label" placeholder="Par exemple : Quelle durée ?"></div><div class="field"><label class="lab" for="nc-opts">Réponses (une par ligne)</label><textarea class="in" id="nc-opts" placeholder="Un film court&#10;Un film long"></textarea></div><p class="err" id="ncErr" role="alert"></p><div><button type="button" class="btn small" data-act="cadd">Ajouter le critère</button></div></div></section>';
   h+='<section class="sect"><h2>Sauvegarde</h2><p class="muted">La liste est enregistrée dans ce navigateur. Pour la garder ailleurs ou la passer sur un autre appareil, copiez le texte de sauvegarde, puis collez-le là-bas. La <strong>sauvegarde légère</strong> ne garde que vos changements (films ajoutés, retirés, modifiés, vus) : le texte est court et passe dans une appli de notes. La sauvegarde complète contient tous les films et peut être trop longue.</p>'+
     '<div class="field"><label class="lab" for="backup">Texte de sauvegarde</label><textarea class="in" id="backup" spellcheck="false" placeholder="Appuyez sur « Copier la sauvegarde », ou collez ici une sauvegarde à importer.">'+esc(backupText)+'</textarea></div>'+
-    '<div class="form-act"><button type="button" class="btn primary" data-act="exportlight">Copier la sauvegarde légère</button><button type="button" class="btn" data-act="export">Copier la sauvegarde complète</button><button type="button" class="btn'+(confirmKey==='import'?' armed':'')+'" data-act="import">'+(confirmKey==='import'?'Confirmer : remplacer la liste':'Importer ce texte')+'</button></div>'+
+    '<div class="form-act"><button type="button" class="btn primary" data-act="exportfile">Enregistrer la sauvegarde dans un fichier</button>'+((navigator.canShare&&navigator.share)?'<button type="button" class="btn" data-act="sharefile">Envoyer le fichier…</button>':'')+'</div>'+
+    '<p class="note-line">Le fichier se range dans les Téléchargements du téléphone, sans limite de taille. Pour restaurer, utilisez « Ou charger un fichier de sauvegarde » plus bas, puis « Importer ce texte ».</p>'+
+    '<div class="form-act"><button type="button" class="btn" data-act="exportlight">Copier la sauvegarde légère</button><button type="button" class="btn" data-act="export">Copier la sauvegarde complète</button><button type="button" class="btn'+(confirmKey==='import'?' armed':'')+'" data-act="import">'+(confirmKey==='import'?'Confirmer : remplacer la liste':'Importer ce texte')+'</button></div>'+
     '<div class="field"><label class="lab" for="fileImport">Ou charger un fichier de sauvegarde</label><input class="in" id="fileImport" type="file" accept=".json,.txt,application/json,text/plain"></div>'+
     '<div><button type="button" class="btn small '+(confirmKey==='reset'?'armed':'danger')+'" data-act="reset">'+(confirmKey==='reset'?'Confirmer : revenir à la liste d\'origine':'Revenir à la liste d\'origine')+'</button></div></section>';
   el.innerHTML=h;
@@ -865,6 +867,22 @@ document.addEventListener('click',function(e){
     data.criteria.push({id:nid,label:lab,options:opts.map(function(s){return {id:uid('o'),label:s};})});
     data.films.forEach(function(f){f.tags[nid]=[];});
     afterChange();renderSettings();toast('Critère ajouté. Pensez à l\'attribuer à vos films.');return;
+  }
+  if(act==='exportfile'||act==='sharefile'){
+    var txt=lightBackup();
+    var fname='cinemood-sauvegarde-'+new Date().toISOString().slice(0,10)+'.json';
+    var blob=new Blob([txt],{type:'application/json'});
+    if(act==='sharefile'){
+      var fl=null;try{fl=new File([blob],fname,{type:'application/json'});}catch(e0){}
+      if(fl&&navigator.canShare&&navigator.canShare({files:[fl]})){navigator.share({files:[fl],title:'Sauvegarde CinéMood'}).catch(function(){});}
+      else toast('Le partage de fichier n\'est pas disponible ici.');
+      return;
+    }
+    var url=URL.createObjectURL(blob),an=document.createElement('a');
+    an.href=url;an.download=fname;an.style.display='none';document.body.appendChild(an);an.click();an.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},4000);
+    toast('Fichier « '+fname+' » enregistré (dossier Téléchargements)');
+    return;
   }
   if(act==='export'||act==='exportlight'){
     var json=(act==='exportlight')?lightBackup():JSON.stringify(data);

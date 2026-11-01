@@ -1,5 +1,5 @@
 /* CinéMood : cache hors ligne. Changez VERSION à chaque mise à jour pour forcer le rafraîchissement. */
-const VERSION = 'cinemood-v2';
+const VERSION = 'cinemood-v3';
 const ASSETS = [
   "./",
   "index.html",

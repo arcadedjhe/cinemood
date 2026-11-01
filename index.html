@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CinéMood</title>
+<meta name="description" content="Choisissez un film pour les enfants en touchant un critère : genre, univers, ambiance, style, époque ou âge.">
+<meta name="theme-color" content="#1B1F3B">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CinéMood">
+<style>
+@font-face{font-family:'Fredoka';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/fredoka-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Fredoka';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/fredoka-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Fredoka';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/fredoka-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/nunito-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/nunito-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/nunito-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Nunito';font-style:normal;font-weight:800;font-display:swap;src:url(fonts/nunito-latin-800-normal.woff2) format('woff2')}
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/dm-mono-latin-500-normal.woff2) format('woff2')}
+
+/* Concept : une séance de cinéma. Questions en pastilles colorées, un billet qui tombe au tirage. */
+:root{
+  color-scheme:light;
+  --bg:#F3F4FB; --surface:#FFFFFF; --ink:#1B1F3B; --muted:#5A5F82; --line:#D5D9EC;
+  --accent:#FF7A59; --on-color:#1B1F3B; --edge:#1B1F3B; --focus:#2F6BFF;
+  --ticket:#FFFFFF; --scrim:#1B1F3B; --danger:#C9282D; --on-danger:#FFFFFF;
+  --c0:#FF8A6B; --c1:#FFC93C; --c2:#5ED3A0; --c3:#6EC1FF; --c4:#B79BFF; --c5:#FF8FB8;
+  --display:'Fredoka','Baloo 2','Trebuchet MS',system-ui,sans-serif;
+  --body:'Nunito',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'DM Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#13152B; --surface:#1E2140; --ink:#F0F1FB; --muted:#A5AACF; --line:#353A66;
+    --accent:#FF8A6B; --edge:#090A18; --focus:#8FB4FF; --ticket:#262A58; --scrim:#090A18;
+    --danger:#FF7B7F; --on-danger:#1B1F3B; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#13152B; --surface:#1E2140; --ink:#F0F1FB; --muted:#A5AACF; --line:#353A66;
+  --accent:#FF8A6B; --edge:#090A18; --focus:#8FB4FF; --ticket:#262A58; --scrim:#090A18;
+  --danger:#FF7B7F; --on-danger:#1B1F3B; color-scheme:dark;
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--body); font-size:17px; line-height:1.45;
+  padding-block:20px 28px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));
+  padding-right:max(16px,env(safe-area-inset-right,0px));
+}
+body.lock{overflow:hidden}
+.app{max-width:780px;margin-inline:auto}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h1,h2,h3{font-family:var(--display);margin:0;text-wrap:balance}
+p{margin:0}
+.muted{color:var(--muted)}
+
+.top{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.top svg{flex:none}
+h1{font-weight:700;font-size:clamp(30px,7vw,42px);line-height:1.05;letter-spacing:-.01em}
+.tag{color:var(--muted);font-size:16px;margin-top:2px}
+
+.tabs{display:flex;gap:4px;padding:4px;background:var(--surface);border:1px solid var(--line);border-radius:16px;margin-bottom:22px}
+.tab{flex:1;min-width:0;min-height:44px;border:0;border-radius:12px;background:transparent;color:var(--muted);font:600 17px/1.2 var(--display);cursor:pointer;padding:8px 6px}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg)}
+
+.btn{font:700 16px/1.2 var(--body);min-height:44px;padding:10px 16px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--muted)}
+.btn.small{min-height:40px;padding:6px 12px;font-size:15px}
+.btn.primary{background:var(--accent);color:var(--on-color);border-color:var(--edge);box-shadow:0 3px 0 var(--edge);font-family:var(--display);font-size:19px;font-weight:600}
+.btn.primary:active{transform:translateY(2px);box-shadow:0 1px 0 var(--edge)}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.btn.danger{color:var(--danger);border-color:var(--danger)}
+.btn.armed{background:var(--danger);color:var(--on-danger);border-color:var(--danger)}
+
+/* Choisir */
+.hint{color:var(--muted);margin-bottom:22px;max-width:60ch}
+.crit{margin-bottom:26px}
+.q{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:600;margin-bottom:12px}
+.dot{width:16px;height:16px;border-radius:50%;background:var(--cc);border:2px solid var(--edge);flex:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:10px;min-height:46px;padding:9px 14px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font:700 16px/1.25 var(--body);text-align:left;cursor:pointer;max-width:100%}
+.chip:hover{border-color:var(--muted)}
+.chip .n{font:500 12px var(--mono);background:var(--bg);color:var(--muted);border-radius:8px;padding:2px 7px;flex:none}
+.chip[aria-pressed="true"]{background:var(--cc);color:var(--on-color);border-color:var(--edge);box-shadow:0 3px 0 var(--edge);transform:translateY(-1px)}
+.chip[aria-pressed="true"] .n{background:var(--on-color);color:var(--cc)}
+.chip[aria-disabled="true"]{opacity:.45;border-style:dashed;cursor:not-allowed}
+.switch{display:flex;align-items:center;gap:10px;margin:6px 0 4px;font-weight:600;cursor:pointer}
+.switch input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.bar{position:sticky;bottom:calc(8px + env(safe-area-inset-bottom,0px));margin-top:24px;z-index:5;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 28px rgba(20,22,50,.18)}
+.bar-info{font-weight:700}
+.bar-info .big{font:700 26px var(--display);margin-right:4px}
+.bar-act{display:flex;gap:8px;flex-wrap:wrap}
+.empty{padding:28px 0;color:var(--muted)}
+
+/* Billet */
+.overlay{position:fixed;inset:0;z-index:50;background:var(--scrim);display:flex;overflow:auto;
+  padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.ticket{margin:auto;width:min(100%,480px);background:var(--ticket);color:var(--ink);border-radius:22px;position:relative;box-shadow:0 18px 50px rgba(0,0,0,.45);animation:rise .38s ease-out both}
+@keyframes rise{from{opacity:0;transform:translateY(22px) rotate(-1.5deg)}to{opacity:1;transform:none}}
+.t-band{display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--c1);color:#1B1F3B;padding:8px 8px 8px 22px;border-radius:22px 22px 0 0;font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase}
+.t-close{min-width:44px;min-height:44px;border:0;border-radius:12px;background:transparent;color:#1B1F3B;font:600 26px/1 var(--display);cursor:pointer}
+.t-close:hover{background:rgba(27,31,59,.14)}
+.t-main{padding:22px 24px 28px}
+.t-kicker{font:500 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.t-title{font-weight:700;font-size:clamp(32px,9vw,46px);line-height:1.04;margin:8px 0 10px;overflow-wrap:anywhere}
+.t-meta{font:500 14px var(--mono);color:var(--muted)}
+.perf{position:relative;height:0;border-top:3px dashed var(--line);margin:0 18px}
+.perf::before,.perf::after{content:"";position:absolute;top:-15px;width:28px;height:28px;border-radius:50%;background:var(--scrim)}
+.perf::before{left:-32px}
+.perf::after{right:-32px}
+.t-lower{padding:24px 24px 24px;display:grid;gap:16px}
+.is-rolling .t-lower,.is-rolling .t-meta{visibility:hidden}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{display:inline-flex;align-items:center;gap:7px;padding:3px 10px;border-radius:999px;background:var(--bg);font-weight:700;font-size:14px}
+.pill::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--cc);flex:none}
+.t-note{color:var(--muted)}
+.t-actions{display:grid;gap:10px}
+.t-actions .btn{width:100%}
+
+/* Films et réglages */
+.tools{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.tools .in{flex:1 1 200px}
+.in{font:600 16px var(--body);width:100%;min-height:46px;padding:9px 12px;border:2px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink)}
+textarea.in{min-height:96px;resize:vertical;line-height:1.4}
+.films{list-style:none;margin:8px 0 0;padding:0}
+.film{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 14px;padding:14px 0;border-bottom:1px solid var(--line)}
+.f-title{font:600 19px/1.25 var(--display);overflow-wrap:anywhere}
+.yr{font:500 14px var(--mono);color:var(--muted);margin-left:8px}
+.badge{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--muted);color:var(--muted);border-radius:6px;padding:1px 6px;margin-left:8px;white-space:nowrap}
+.f-tags{color:var(--muted);font-size:14px;margin-top:3px}
+.f-act{display:flex;gap:6px;align-items:flex-start;flex-wrap:wrap}
+@media (max-width:520px){.film{grid-template-columns:minmax(0,1fr)}}
+.foot-actions{margin-top:22px;display:flex;flex-wrap:wrap;gap:10px}
+.form{display:grid;gap:18px}
+.field{display:grid;gap:6px;min-width:0}
+.lab{font-weight:800;font-size:15px}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:12px}
+.err{color:var(--danger);font-weight:700;min-height:1.4em}
+.form-act{display:flex;flex-wrap:wrap;gap:10px}
+.sect{display:grid;gap:14px;margin-bottom:28px}
+.sect h2{font-size:24px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:12px;min-width:0}
+.opts{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.opt,.add{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+.warn{background:var(--surface);border:2px solid var(--danger);color:var(--danger);font-weight:700;border-radius:14px;padding:12px 14px;margin-bottom:18px}
+.note-line{font-size:15px;color:var(--muted)}
+
+.toast{position:fixed;left:50%;top:calc(12px + env(safe-area-inset-top,0px));transform:translate(-50%,-140%);z-index:80;max-width:min(92vw,420px);background:var(--ink);color:var(--bg);font-weight:700;padding:10px 16px;border-radius:12px;transition:transform .25s ease;pointer-events:none;text-align:center}
+.toast.show{transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){
+  .ticket{animation:none}
+  .toast{transition:none}
+  .chip[aria-pressed="true"]{transform:none}
+}
+</style>
+</head>
+<body>
+
+
+<div class="app">
+  <header class="top">
+    <svg width="56" height="36" viewBox="0 0 56 36" aria-hidden="true"><path d="M6 2h44a4 4 0 0 1 4 4v6a6 6 0 0 0 0 12v6a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4v-6a6 6 0 0 0 0-12V6a4 4 0 0 1 4-4z" fill="var(--c1)" stroke="var(--ink)" stroke-width="2.5"/><path d="M38 7v22" stroke="var(--ink)" stroke-width="2.5" stroke-dasharray="3 3" fill="none"/></svg>
+    <div>
+      <h1>CinéMood</h1>
+      <p class="tag">Un critère, un film pour la séance.</p>
+    </div>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Sections">
+    <button class="tab" role="tab" id="tab-choose" data-act="tab" data-tab="choose" aria-selected="true" aria-controls="panel-choose">Choisir</button>
+    <button class="tab" role="tab" id="tab-films" data-act="tab" data-tab="films" aria-selected="false" aria-controls="panel-films">Films</button>
+    <button class="tab" role="tab" id="tab-settings" data-act="tab" data-tab="settings" aria-selected="false" aria-controls="panel-settings">Réglages</button>
+  </div>
+
+  <main>
+    <div id="panel-choose" role="tabpanel" aria-labelledby="tab-choose"></div>
+    <div id="panel-films" role="tabpanel" aria-labelledby="tab-films" hidden></div>
+    <div id="panel-settings" role="tabpanel" aria-labelledby="tab-settings" hidden></div>
+  </main>
+</div>
+
+<div id="overlay" class="overlay" hidden role="dialog" aria-modal="true" aria-label="Film proposé"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div id="live" class="sr-only" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+
+var KEY='cine-choix-v1';
+var ERA_ID='epoque';
+var ERA={id:ERA_ID,label:'À quelle époque ?',options:[
+  {id:'e1',label:'Avant 1960',short:'Avant 1960'},
+  {id:'e2',label:'De 1960 à 1979',short:'1960–1979'},
+  {id:'e3',label:'De 1980 à 1999',short:'1980–1999'},
+  {id:'e4',label:'De 2000 à 2009',short:'2000–2009'},
+  {id:'e5',label:'De 2010 à 2019',short:'2010–2019'},
+  {id:'e6',label:'2020 et après',short:'Depuis 2020'}
+]};
+
+var AGE_ID='age';
+var AGE={id:AGE_ID,label:'Quel âge ont les enfants ? (le plus jeune)',options:[8,9,10,11,12,13,14,15,16].map(function(n){return {id:'a'+n,label:n+' ans',short:'Dès '+n+' ans'};})};
+// Âge minimum conseillé (estimation, à vérifier). Un film est proposé si son âge est inférieur ou égal à l'âge choisi.
+var AGE_DATA=[
+"Le Roi Lion|6","La Reine des neiges|5","Vaiana, la légende du bout du monde|5","Toy Story|4","Le Monde de Nemo|4","Shrek|6","Moi, moche et méchant|5","Les Indestructibles|6","Ratatouille|5","WALL·E|5","Monstres & Cie|5","Là-haut|6","Coco|6","Vice-versa|6","Dragons|6","Kung Fu Panda|5","Madagascar|5","L'Âge de glace|5","Le Voyage de Chihiro|8","Mon voisin Totoro|4","Kiki la petite sorcière|5","Ponyo sur la falaise|4","Aladdin|5","La Belle et la Bête|5","La Petite Sirène|4","Peter Pan|4","Le Livre de la jungle|4","Les Aristochats|4","Mary Poppins|5","Le Magicien d'Oz|6","Peter et Elliott le dragon|5","E.T. l'extra-terrestre|7","Retour vers le futur|10","Les Goonies|10","Qui veut la peau de Roger Rabbit|8","Casper|6","Le Monde de Narnia|8","Harry Potter à l'école des sorciers|8","Wallace & Gromit : Le Mystère du lapin-garou|6","Scooby-Doo|7","Les Mitchell contre les machines|7","Encanto, la fantastique famille Madrigal|6","Le Robot sauvage|7","Lilo & Stitch|6","La Planète au trésor|7","Chicken Run|6","Basil, détective privé|5","Coraline|9","Ernest et Célestine|4","Kirikou et la sorcière|5","Le Petit Nicolas|6","Paddington|5","Matilda|7","Maman, j'ai raté l'avion|8","Babe, le cochon devenu berger|5","Sauvez Willy|6","Mulan|6","Tarzan|5","Jumanji|9",
+"La Gloire de mon père|8","Le Château de ma mère|8","Chantons sous la pluie|6","Mon nom est Personne|12","O'Brother|12","L'Ours|8","Fievel et le Nouveau Monde|5","Le Kid|6","L'Histoire sans fin|8","Stand by Me|12","Les Temps modernes|6","Sherlock Junior|6","Cinema Paradiso|10","L'Étrange Noël de monsieur Jack|7","Oscar|10","Indiana Jones : Les Aventuriers de l'arche perdue|10","The Blues Brothers|12","The Mask|12","Pirates des Caraïbes : La Malédiction du Black Pearl|10","Terminator|14","Princesse Mononoké|10","Le Château dans le ciel|7","Madame Doubtfire|8","Last Action Hero|12","Waterworld|12","Le Cinquième Élément|12","Star Wars : Un nouvel espoir|8","Nos jours heureux|10","La Grande Vadrouille|8","Le Corniaud|8","La Cuisine au beurre|8","Un jour sans fin|10","Ghostbusters|10","Jurassic Park|10","Croc-Blanc|8","Beethoven|6","Rasta Rocket|8","La Famille Addams|9","Beetlejuice|12","Le Grinch|6","Taram et le Chaudron magique|8","Les Choristes|8","Nanny McPhee|7","Charlie et la Chocolaterie|7","Iron Man|10","Les Noces funèbres|8","Les 400 coups|12","La Ferme des animaux|10","Stardust, le mystère de l'étoile|10","Les Simpson, le film|10","Avengers|10","Frankenweenie|8","Alice au pays des merveilles|4","Captain America : First Avenger|10","Ma vie de Courgette|8","Le Secret de la pyramide|10","La Ruée vers l'or|6","Super Noël|6","Didier|8","Le Géant de fer|6","Les Chevaliers de la Table ronde|8","Peter Pan (2003)|8","Tron : L'Héritage|10","Pompoko|9","Robinson & Compagnie|5","Le Dirigeable volé|8","Le Petit Frère|6","L'Homme de Rio|10","Rebelle|6","Tout en haut du monde|7","Dumbo (2019)|6","Le Peuple loup|8","L'Incroyable Aventure de Bella|7","Spider-Man : Across the Spider-Verse|10","Tempête|10","Flow, le chat qui n'avait pas peur de l'eau|7","Le Fabuleux Destin d'Amélie Poulain|12"
+];
+var AGE_MAP={};
+AGE_DATA.forEach(function(s){var i=s.lastIndexOf('|');AGE_MAP[norm(s.slice(0,i))]=parseInt(s.slice(i+1),10);});
+function ageOfTitle(t){var a=AGE_MAP[norm(t)];return a==null?null:a;}
+
+var SEED_CRITERIA=[
+{id:'genre',label:"Quel genre d'histoire ?",options:[
+  {id:'rire',label:'Rire et faire les idiots',short:'Rire'},
+  {id:'aventure',label:"Partir à l'aventure",short:'Aventure'},
+  {id:'emotion',label:'Une histoire touchante ou familiale',short:'Touchant'},
+  {id:'magie',label:'De la magie et du merveilleux',short:'Magie'},
+  {id:'scifi',label:'De la science-fiction et des mondes étranges',short:'Science-fiction'},
+  {id:'enquete',label:'Une enquête ou un mystère',short:'Enquête'}]},
+{id:'univers',label:'Quel univers ?',options:[
+  {id:'famille',label:'La vraie vie et la famille',short:'Famille'},
+  {id:'nature',label:'La nature et les animaux',short:'Nature et animaux'},
+  {id:'contes',label:'Les contes, la magie et les légendes',short:'Contes et légendes'},
+  {id:'espace',label:"L'espace, les robots et le futur",short:'Espace et robots'},
+  {id:'monstres',label:'Les monstres, les fantômes et le bizarre',short:'Monstres et bizarre'},
+  {id:'pirates',label:'Les pirates, les trésors et les explorateurs',short:'Pirates et explorateurs'}]},
+{id:'ambiance',label:'Quelle ambiance ?',options:[
+  {id:'drole',label:'Drôle et légère',short:'Drôle'},
+  {id:'feerique',label:'Merveilleuse et féerique',short:'Féerique'},
+  {id:'action',label:"Pleine d'action et de suspense",short:'Action'},
+  {id:'mystere',label:'Un peu mystérieuse ou effrayante',short:'Mystérieuse'},
+  {id:'emouvante',label:'Émouvante et humaine',short:'Émouvante'}]},
+{id:'style',label:'Quel style de cinéma ?',options:[
+  {id:'anim',label:'Dessin animé',short:'Dessin animé'},
+  {id:'acteurs',label:'Film avec de vrais acteurs',short:'Vrais acteurs'},
+  {id:'mixte',label:'Mélange de dessins animés et de vrais acteurs',short:'Mélange'},
+  {id:'musique',label:'Un film avec beaucoup de musique et de chansons',short:'Musical'}]}
+];
+
+// titre, année, genre, univers, ambiance, style
+var SEED_FILMS=[
+["Le Roi Lion",1994,"aventure emotion","nature","emouvante action","anim musique"],
+["La Reine des neiges",2013,"magie aventure emotion","contes","feerique emouvante","anim musique"],
+["Vaiana, la légende du bout du monde",2016,"aventure magie","pirates nature","action feerique","anim musique"],
+["Toy Story",1995,"rire aventure","famille","drole action","anim"],
+["Le Monde de Nemo",2003,"aventure rire emotion","nature","drole emouvante","anim"],
+["Shrek",2001,"rire aventure magie","contes","drole","anim"],
+["Moi, moche et méchant",2010,"rire emotion","famille","drole","anim"],
+["Les Indestructibles",2004,"aventure rire","famille","action drole","anim"],
+["Ratatouille",2007,"rire emotion","nature","drole emouvante","anim"],
+["WALL·E",2008,"scifi emotion aventure","espace","emouvante","anim"],
+["Monstres & Cie",2001,"rire aventure","monstres","drole action","anim"],
+["Là-haut",2009,"aventure emotion","pirates famille","emouvante drole","anim"],
+["Coco",2017,"emotion magie","famille monstres","feerique emouvante","anim musique"],
+["Vice-versa",2015,"emotion rire","famille","emouvante drole","anim"],
+["Dragons",2010,"aventure magie","nature contes","action emouvante","anim"],
+["Kung Fu Panda",2008,"rire aventure","nature","drole action","anim"],
+["Madagascar",2005,"rire aventure","nature","drole","anim"],
+["L'Âge de glace",2002,"rire aventure","nature","drole action","anim"],
+["Le Voyage de Chihiro",2001,"magie aventure","contes monstres","feerique mystere","anim"],
+["Mon voisin Totoro",1988,"magie emotion","nature famille","feerique emouvante","anim"],
+["Kiki la petite sorcière",1989,"magie emotion","contes","feerique emouvante","anim"],
+["Ponyo sur la falaise",2008,"magie aventure","nature","feerique","anim"],
+["Aladdin",1992,"aventure magie rire","contes","feerique action drole","anim musique"],
+["La Belle et la Bête",1991,"magie emotion","contes","feerique emouvante","anim musique"],
+["La Petite Sirène",1989,"magie aventure","contes nature","feerique emouvante","anim musique"],
+["Peter Pan",1953,"aventure magie","pirates contes","feerique action","anim"],
+["Le Livre de la jungle",1967,"aventure rire","nature","drole action","anim musique"],
+["Les Aristochats",1970,"rire aventure","nature","drole","anim musique"],
+["Mary Poppins",1964,"magie rire","famille","feerique drole","mixte musique"],
+["Le Magicien d'Oz",1939,"aventure magie","contes","feerique","acteurs musique"],
+["Peter et Elliott le dragon",1977,"aventure magie","nature contes","feerique","mixte musique"],
+["E.T. l'extra-terrestre",1982,"scifi emotion aventure","espace famille","emouvante","acteurs"],
+["Retour vers le futur",1985,"scifi aventure rire","espace","action drole","acteurs"],
+["Les Goonies",1985,"aventure rire enquete","pirates","action mystere","acteurs"],
+["Qui veut la peau de Roger Rabbit",1988,"rire enquete","monstres","drole mystere","mixte"],
+["Casper",1995,"magie emotion rire","monstres","drole mystere emouvante","mixte"],
+["Le Monde de Narnia",2005,"magie aventure","contes","feerique action","acteurs"],
+["Harry Potter à l'école des sorciers",2001,"magie aventure enquete","contes monstres","feerique mystere action","acteurs"],
+["Wallace & Gromit : Le Mystère du lapin-garou",2005,"enquete rire","monstres","drole mystere","anim"],
+["Scooby-Doo",2002,"enquete rire","monstres","drole mystere","mixte"],
+["Les Mitchell contre les machines",2021,"scifi rire emotion","famille espace","drole action","anim"],
+["Encanto, la fantastique famille Madrigal",2021,"magie emotion","famille","feerique emouvante","anim musique"],
+["Le Robot sauvage",2024,"scifi emotion aventure","nature espace","emouvante","anim"],
+["Lilo & Stitch",2002,"scifi rire emotion","espace famille","drole emouvante","anim"],
+["La Planète au trésor",2002,"scifi aventure","pirates espace","action","anim"],
+["Chicken Run",2000,"rire aventure","nature","drole action","anim"],
+["Basil, détective privé",1986,"enquete rire","nature","mystere drole","anim"],
+["Coraline",2009,"magie aventure","monstres","mystere","anim"],
+["Ernest et Célestine",2012,"emotion aventure rire","nature famille","emouvante drole","anim"],
+["Kirikou et la sorcière",1998,"aventure magie","contes","feerique action","anim"],
+["Le Petit Nicolas",2009,"rire emotion","famille","drole","acteurs"],
+["Paddington",2014,"rire aventure emotion","famille nature","drole emouvante","mixte"],
+["Matilda",1996,"magie rire emotion","famille","drole emouvante","acteurs"],
+["Maman, j'ai raté l'avion",1990,"rire aventure","famille","drole","acteurs"],
+["Babe, le cochon devenu berger",1995,"rire emotion","nature","drole emouvante","acteurs"],
+["Sauvez Willy",1993,"aventure emotion","nature","emouvante","acteurs"],
+["Mulan",1998,"aventure","contes","action emouvante","anim musique"],
+["Tarzan",1999,"aventure emotion","nature","action emouvante","anim musique"],
+["Jumanji",1995,"aventure magie rire","pirates nature","action mystere","acteurs"]
+];
+
+// Ajout n°2 : fusionné automatiquement dans les listes déjà enregistrées (seedRev 2)
+var SEED_FILMS_V2=[
+["La Gloire de mon père",1990,"emotion","famille nature","emouvante","acteurs"],
+["Le Château de ma mère",1990,"emotion rire","famille nature","emouvante drole","acteurs"],
+["Chantons sous la pluie",1952,"rire","famille","drole","acteurs musique"],
+["Mon nom est Personne",1973,"rire aventure","","drole action","acteurs"],
+["O'Brother",2000,"rire aventure","contes","drole","acteurs musique"],
+["L'Ours",1988,"aventure emotion","nature","emouvante action","acteurs"],
+["Fievel et le Nouveau Monde",1986,"aventure emotion","nature famille","emouvante","anim musique"],
+["Le Kid",1921,"rire emotion","famille","drole emouvante","acteurs"],
+["L'Histoire sans fin",1984,"magie aventure","contes","feerique action emouvante","acteurs"],
+["Stand by Me",1986,"aventure emotion","famille","emouvante","acteurs"],
+["Les Temps modernes",1936,"rire","famille","drole","acteurs"],
+["Sherlock Junior",1924,"rire enquete","famille","drole mystere","acteurs"],
+["Cinema Paradiso",1988,"emotion","famille","emouvante","acteurs"],
+["L'Étrange Noël de monsieur Jack",1993,"magie aventure","monstres","mystere feerique","anim musique"],
+["Oscar",1967,"rire","famille","drole","acteurs"],
+["Indiana Jones : Les Aventuriers de l'arche perdue",1981,"aventure","pirates","action","acteurs"],
+["The Blues Brothers",1980,"rire","famille","drole action","acteurs musique"],
+["The Mask",1994,"rire magie","monstres","drole action","mixte"],
+["Pirates des Caraïbes : La Malédiction du Black Pearl",2003,"aventure magie rire","pirates monstres","action drole","acteurs"],
+["Terminator",1984,"scifi","espace","action","acteurs"],
+["Princesse Mononoké",1997,"aventure magie","nature contes","action emouvante","anim"],
+["Le Château dans le ciel",1986,"aventure magie scifi","pirates espace","action feerique","anim"],
+["Madame Doubtfire",1993,"rire emotion","famille","drole emouvante","acteurs"],
+["Last Action Hero",1993,"rire aventure","famille","drole action","acteurs"],
+["Waterworld",1995,"aventure scifi","pirates espace","action","acteurs"],
+["Le Cinquième Élément",1997,"scifi aventure rire","espace","action drole","acteurs"],
+["Star Wars : Un nouvel espoir",1977,"scifi aventure","espace","action","acteurs"],
+["Nos jours heureux",2006,"rire emotion","famille","drole emouvante","acteurs"],
+["La Grande Vadrouille",1966,"rire aventure","famille","drole action","acteurs"],
+["Le Corniaud",1965,"rire aventure","famille","drole","acteurs"],
+["La Cuisine au beurre",1963,"rire","famille","drole","acteurs"],
+["Un jour sans fin",1993,"rire magie","famille","drole emouvante","acteurs"],
+["Ghostbusters",1984,"rire scifi enquete","monstres","drole mystere action","acteurs"],
+["Jurassic Park",1993,"aventure scifi","nature","action mystere","acteurs"],
+["Croc-Blanc",1991,"aventure emotion","nature","emouvante action","acteurs"],
+["Beethoven",1992,"rire emotion","famille nature","drole","acteurs"],
+["Rasta Rocket",1993,"rire emotion","famille","drole emouvante","acteurs"],
+["La Famille Addams",1991,"rire","monstres famille","drole mystere","acteurs"],
+["Beetlejuice",1988,"rire magie","monstres","drole mystere","acteurs"],
+["Le Grinch",2000,"rire magie","famille","drole feerique","acteurs"],
+["Taram et le Chaudron magique",1985,"magie aventure","contes","feerique action mystere","anim"],
+["Les Choristes",2004,"emotion","famille","emouvante","acteurs musique"],
+["Nanny McPhee",2005,"magie rire emotion","famille","drole feerique","acteurs"],
+["Charlie et la Chocolaterie",2005,"magie rire aventure","contes","feerique drole","acteurs"],
+["Iron Man",2008,"scifi aventure","espace","action","acteurs"],
+["Les Noces funèbres",2005,"magie emotion rire","monstres","mystere feerique drole","anim musique"],
+["Les 400 coups",1959,"emotion","famille","emouvante","acteurs"],
+["La Ferme des animaux",1954,"emotion","nature","emouvante","anim"],
+["Stardust, le mystère de l'étoile",2007,"magie aventure","contes pirates","feerique action drole","acteurs"],
+["Les Simpson, le film",2007,"rire","famille","drole","anim"],
+["Avengers",2012,"scifi aventure","espace","action","acteurs"],
+["Frankenweenie",2012,"rire emotion","monstres famille","mystere drole emouvante","anim"],
+["Alice au pays des merveilles",1951,"magie aventure rire","contes","feerique drole","anim musique"],
+["Captain America : First Avenger",2011,"aventure scifi","espace","action","acteurs"],
+["Ma vie de Courgette",2016,"emotion","famille","emouvante","anim"],
+["Le Secret de la pyramide",1985,"aventure enquete","pirates","mystere action","acteurs"],
+["La Ruée vers l'or",1925,"rire aventure","pirates","drole","acteurs"],
+["Super Noël",1994,"rire magie","famille contes","drole feerique","acteurs"],
+["Didier",1997,"rire","famille nature","drole","acteurs"],
+["Le Géant de fer",1999,"scifi emotion aventure","espace famille","emouvante","anim"],
+["Les Chevaliers de la Table ronde",1953,"aventure","contes","action","acteurs"],
+["Peter Pan (2003)",2003,"aventure magie","pirates contes","feerique action","acteurs"],
+["Tron : L'Héritage",2010,"scifi aventure","espace","action","acteurs"],
+["Pompoko",1994,"magie rire emotion","nature contes","drole feerique","anim"],
+["Robinson & Compagnie",1990,"aventure emotion","pirates nature","drole emouvante","anim"],
+["Le Dirigeable volé",1967,"aventure scifi","pirates","action feerique","mixte"],
+["Le Petit Frère",1927,"rire aventure","famille","drole","acteurs"],
+["L'Homme de Rio",1964,"aventure rire","pirates","action drole","acteurs"],
+["Rebelle",2012,"aventure magie","contes","action feerique","anim"],
+["Tout en haut du monde",2015,"aventure","pirates","action emouvante","anim"],
+["Dumbo (2019)",2019,"emotion aventure","nature","emouvante feerique","mixte"],
+["Le Peuple loup",2020,"magie aventure","nature contes","feerique action","anim"],
+["L'Incroyable Aventure de Bella",2019,"aventure emotion","nature","emouvante","acteurs"],
+["Spider-Man : Across the Spider-Verse",2023,"scifi aventure","espace","action","anim"],
+["Tempête",2022,"emotion aventure","nature famille","emouvante","acteurs"],
+["Flow, le chat qui n'avait pas peur de l'eau",2024,"aventure emotion","nature","emouvante","anim"],
+["Le Fabuleux Destin d'Amélie Poulain",2001,"rire emotion","famille","drole emouvante","acteurs"]
+];
+
+/* ---------- utilitaires ---------- */
+var $=function(s,r){return (r||document).querySelector(s);};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function uid(p){return p+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-3);}
+function norm(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();}
+function eraOf(y){
+  y=parseInt(y,10);if(!y)return null;
+  if(y<1960)return 'e1';
+  if(y<1980)return 'e2';
+  if(y<2000)return 'e3';
+  if(y<2010)return 'e4';
+  if(y<2020)return 'e5';
+  return 'e6';
+}
+function reduced(){return window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;}
+
+/* ---------- données ---------- */
+function mkFilm(r,id,criteria){
+  var codes={genre:r[2],univers:r[3],ambiance:r[4],style:r[5]};
+  var tags={};
+  criteria.forEach(function(c){
+    var arr=(Object.prototype.hasOwnProperty.call(codes,c.id)?codes[c.id]:'').split(' ').filter(Boolean);
+    tags[c.id]=arr.filter(function(x){return c.options.some(function(o){return o.id===x;});});
+  });
+  return {id:id,title:r[0],year:r[1],age:ageOfTitle(r[0]),tags:tags,note:'',seen:false};
+}
+function seedData(){
+  var criteria=JSON.parse(JSON.stringify(SEED_CRITERIA));
+  var films=SEED_FILMS.map(function(r,i){return mkFilm(r,'f'+(i+1),criteria);})
+    .concat(SEED_FILMS_V2.map(function(r,i){return mkFilm(r,'g'+(i+1),criteria);}));
+  return {version:1,seedRev:3,criteria:criteria,films:films,settings:{hideSeen:true}};
+}
+var migrated=false, addedCount=0;
+function migrate(d){
+  var rev=d.seedRev||1;
+  if(rev>=3)return d;
+  if(rev<2){
+    var have={},ids={};
+    d.films.forEach(function(f){have[norm(f.title)]=1;ids[f.id]=1;});
+    SEED_FILMS_V2.forEach(function(r,i){
+      var id='g'+(i+1);
+      if(have[norm(r[0])]||ids[id])return;
+      d.films.push(mkFilm(r,id,d.criteria));addedCount++;
+    });
+  }
+  d.films.forEach(function(f){if(f.age===undefined)f.age=ageOfTitle(f.title);});
+  d.seedRev=3;migrated=true;return d;
+}
+function normalize(d){
+  if(!d||typeof d!=='object'||!Array.isArray(d.criteria)||!Array.isArray(d.films))return null;
+  var cSeen={},criteria=[];
+  d.criteria.forEach(function(c){
+    if(!c||typeof c.label!=='string'||!Array.isArray(c.options))return;
+    var id=(typeof c.id==='string'&&c.id&&c.id!==ERA_ID&&c.id!==AGE_ID&&!cSeen[c.id])?c.id:uid('c');
+    cSeen[id]=1;
+    var oSeen={},options=[];
+    c.options.forEach(function(o){
+      if(!o||typeof o.label!=='string'||!o.label.trim())return;
+      var oid=(typeof o.id==='string'&&o.id&&!oSeen[o.id])?o.id:uid('o');
+      oSeen[oid]=1;
+      var opt={id:oid,label:o.label.trim()};
+      if(typeof o.short==='string'&&o.short)opt.short=o.short;
+      options.push(opt);
+    });
+    criteria.push({id:id,label:c.label.trim()||'Critère',options:options});
+  });
+  var fSeen={},films=[];
+  d.films.forEach(function(f){
+    if(!f||typeof f.title!=='string'||!f.title.trim())return;
+    var id=(typeof f.id==='string'&&f.id&&!fSeen[f.id])?f.id:uid('f');
+    fSeen[id]=1;
+    var tags={};
+    criteria.forEach(function(c){
+      var arr=(f.tags&&Array.isArray(f.tags[c.id]))?f.tags[c.id]:[];
+      tags[c.id]=arr.filter(function(x){return c.options.some(function(o){return o.id===x;});});
+    });
+    var y=parseInt(f.year,10);
+    var ag=(f.age===undefined)?undefined:(parseInt(f.age,10)>=0&&parseInt(f.age,10)<=18?parseInt(f.age,10):null);
+    films.push({id:id,title:f.title.trim(),year:(y>=1880&&y<=2100)?y:null,age:ag,tags:tags,
+      note:typeof f.note==='string'?f.note:'',seen:!!f.seen});
+  });
+  return {version:1,seedRev:parseInt(d.seedRev,10)||1,criteria:criteria,films:films,settings:{hideSeen:!(d.settings&&d.settings.hideSeen===false)}};
+}
+var storageOK=true;
+function load(){
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(raw){var d=normalize(JSON.parse(raw));if(d)return migrate(d);}
+  }catch(e){}
+  return seedData();
+}
+function save(){
+  try{localStorage.setItem(KEY,JSON.stringify(data));storageOK=true;}
+  catch(e){storageOK=false;}
+}
+try{localStorage.setItem('__t','1');localStorage.removeItem('__t');}catch(e){storageOK=false;}
+
+var data=load();
+if(migrated)save();
+var tab='choose', sel={}, shown={}, editing=null, confirmKey=null, query='', backupText='';
+var current=null, rollTimer=null, endTimer=null, lastFocus=null, toastTimer=null;
+
+function allCrit(){return data.criteria.concat([ERA,AGE]);}
+function filmHas(f,cid,oid){
+  if(cid===ERA_ID)return eraOf(f.year)===oid;
+  if(cid===AGE_ID)return f.age!=null&&f.age<=parseInt(oid.slice(1),10);
+  return (f.tags[cid]||[]).indexOf(oid)>-1;
+}
+function matches(f,s){for(var k in s){if(!filmHas(f,k,s[k]))return false;}return true;}
+function eligible(){return data.films.filter(function(f){return !(data.settings.hideSeen&&f.seen);});}
+function hasSel(){return Object.keys(sel).length>0;}
+function optOf(c,oid){return c.options.filter(function(o){return o.id===oid;})[0];}
+function filmTags(f){
+  var out=[];
+  allCrit().forEach(function(c,i){
+    if(c.id===ERA_ID){var e=eraOf(f.year);if(e)out.push({i:i,label:optOf(ERA,e).short});}
+    else if(c.id===AGE_ID){if(f.age!=null)out.push({i:i,label:'Dès '+f.age+' ans'});}
+    else (f.tags[c.id]||[]).forEach(function(oid){var o=optOf(c,oid);if(o)out.push({i:i,label:o.short||o.label});});
+  });
+  return out;
+}
+
+/* ---------- messages ---------- */
+function toast(msg){
+  var t=$('#toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.classList.remove('show');},2600);
+}
+function keyOf(el){
+  if(!el||!el.dataset)return null;
+  if(el.id)return '#'+el.id;
+  if(!el.dataset.act)return null;
+  var s='[data-act="'+el.dataset.act+'"]';
+  if(el.dataset.c)s+='[data-c="'+CSS.escape(el.dataset.c)+'"]';
+  if(el.dataset.o)s+='[data-o="'+CSS.escape(el.dataset.o)+'"]';
+  if(el.dataset.id)s+='[data-id="'+CSS.escape(el.dataset.id)+'"]';
+  return s;
+}
+function refocus(k){if(!k)return;var n=document.querySelector(k);if(n)n.focus({preventScroll:true});}
+
+/* ---------- onglets ---------- */
+function showTab(name){
+  tab=name;confirmKey=null;
+  ['choose','films','settings'].forEach(function(t){
+    $('#panel-'+t).hidden=(t!==name);
+    $('#tab-'+t).setAttribute('aria-selected',t===name?'true':'false');
+    $('#tab-'+t).tabIndex=(t===name)?0:-1;
+  });
+  if(name==='choose')renderChoose();
+  if(name==='films')renderFilms();
+  if(name==='settings')renderSettings();
+}
+
+/* ---------- Choisir ---------- */
+function plural(n){return n===0?'Aucun film ne correspond':(n===1?'1 film possible':n+' films possibles');}
+function renderChoose(){
+  var el=$('#panel-choose');
+  if(!data.films.length){
+    el.innerHTML='<p class="empty">La liste est vide. Ajoutez des films dans l\'onglet « Films ».</p>';return;
+  }
+  var list=eligible();
+  var total=list.filter(function(f){return matches(f,sel);}).length;
+  var seenCount=data.films.filter(function(f){return f.seen;}).length;
+  var h='<p class="hint">Posez une question aux enfants, touchez leur réponse, puis tirez un film. Un seul critère suffit. Le nombre sur chaque réponse indique combien de films restent possibles.</p>';
+  allCrit().forEach(function(c,i){
+    h+='<section class="crit" style="--cc:var(--c'+(i%6)+')"><h2 class="q"><span class="dot" aria-hidden="true"></span>'+esc(c.label)+'</h2><div class="chips" role="group" aria-label="'+esc(c.label)+'">';
+    c.options.forEach(function(o){
+      var on=sel[c.id]===o.id;
+      var s2=Object.assign({},sel);s2[c.id]=o.id;
+      var n=list.filter(function(f){return matches(f,s2);}).length;
+      var dis=!on&&n===0;
+      h+='<button type="button" class="chip" data-act="pick" data-c="'+esc(c.id)+'" data-o="'+esc(o.id)+'" aria-pressed="'+on+'"'+(dis?' aria-disabled="true"':'')+'><span>'+esc(o.label)+'</span><span class="n">'+n+'</span></button>';
+    });
+    h+='</div></section>';
+  });
+  h+='<label class="switch" for="hideSeen"><input type="checkbox" id="hideSeen"'+(data.settings.hideSeen?' checked':'')+'><span>Ne pas reproposer les films déjà vus'+(seenCount?' <span class="muted">('+seenCount+' vu'+(seenCount>1?'s':'')+')</span>':'')+'</span></label>';
+  h+='<div class="bar"><div class="bar-info">'+(total?'<span class="big">'+total+'</span>film'+(total>1?'s':'')+' possible'+(total>1?'s':''):'Aucun film ne correspond')+'</div><div class="bar-act">'+(hasSel()?'<button type="button" class="btn" data-act="clear">Effacer</button>':'')+'<button type="button" class="btn primary" data-act="draw"'+(total?'':' disabled')+'>Tirer un film</button></div></div>';
+  el.innerHTML=h;
+}
+
+function draw(){
+  var list=eligible().filter(function(f){return matches(f,sel);});
+  if(!list.length){toast('Aucun film ne correspond. Changez un critère.');return;}
+  var pool=list.filter(function(f){return !shown[f.id];});
+  var note='';
+  if(!pool.length){
+    shown={};pool=list.slice();
+    note=list.length===1?'C\'est le seul film qui correspond à ces critères.':'On a fait le tour des films possibles. On recommence.';
+  }
+  var film=pool[Math.floor(Math.random()*pool.length)];
+  shown[film.id]=1;
+  openTicket(film,list,note);
+}
+
+/* ---------- Billet ---------- */
+function ticketHtml(f,note){
+  var tags=filmTags(f).map(function(t){return '<span class="pill" style="--cc:var(--c'+(t.i%6)+')">'+esc(t.label)+'</span>';}).join('');
+  var e=eraOf(f.year);
+  var meta=(f.year?f.year:'Année inconnue')+(e?' · '+optOf(ERA,e).short:'');
+  return '<div class="ticket is-rolling">'+
+    '<div class="t-band"><span>Une place · Séance du soir</span><button type="button" class="t-close" data-act="close" aria-label="Fermer">×</button></div>'+
+    '<div class="t-main"><div class="t-kicker">Votre film</div><h2 class="t-title" id="tTitle">'+esc(f.title)+'</h2><div class="t-meta">'+esc(meta)+'</div></div>'+
+    '<div class="perf" aria-hidden="true"></div>'+
+    '<div class="t-lower">'+
+      (tags?'<div class="pills">'+tags+'</div>':'')+
+      (f.note?'<p class="t-note">'+esc(f.note)+'</p>':'')+
+      (note?'<p class="t-note">'+esc(note)+'</p>':'')+
+      '<div class="t-actions"><button type="button" class="btn primary" id="tWatch" data-act="watch">On regarde celui-là !</button><button type="button" class="btn" data-act="again">Tirer un autre film</button></div>'+
+    '</div></div>';
+}
+function clearTimers(){
+  if(rollTimer){clearInterval(rollTimer);rollTimer=null;}
+  if(endTimer){clearTimeout(endTimer);endTimer=null;}
+}
+function openTicket(film,list,note){
+  clearTimers();
+  current=film;
+  var ov=$('#overlay');
+  if(ov.hidden)lastFocus=document.activeElement;
+  ov.hidden=false;document.body.classList.add('lock');
+  ov.innerHTML=ticketHtml(film,note);
+  ov.scrollTop=0;
+  var t=$('.ticket',ov),title=$('#tTitle',ov);
+  function finish(){
+    clearTimers();
+    title.textContent=film.title;
+    t.classList.remove('is-rolling');
+    $('#live').textContent='Film proposé : '+film.title;
+    var w=$('#tWatch');if(w)w.focus({preventScroll:true});
+  }
+  if(reduced()||list.length<2){finish();return;}
+  var close=$('.t-close',ov);if(close)close.focus({preventScroll:true});
+  rollTimer=setInterval(function(){title.textContent=list[Math.floor(Math.random()*list.length)].title;},85);
+  endTimer=setTimeout(finish,1000);
+}
+function closeTicket(){
+  clearTimers();
+  var ov=$('#overlay');ov.hidden=true;ov.innerHTML='';
+  document.body.classList.remove('lock');
+  if(lastFocus&&document.contains(lastFocus))lastFocus.focus({preventScroll:true});
+  else {var d=$('[data-act="draw"]');if(d)d.focus({preventScroll:true});}
+}
+
+/* ---------- Films ---------- */
+function renderFilms(){
+  var el=$('#panel-films');
+  if(editing){el.innerHTML=formHtml();return;}
+  var seenCount=data.films.filter(function(f){return f.seen;}).length;
+  el.innerHTML='<div class="tools"><label class="sr-only" for="q">Rechercher un film</label><input class="in" id="q" type="search" placeholder="Rechercher un film" value="'+esc(query)+'" autocomplete="off"><button type="button" class="btn primary" data-act="new">Ajouter un film</button></div>'+
+    '<p class="note-line" id="filmCount"></p><ul class="films" id="filmList"></ul>'+
+    (seenCount?'<div class="foot-actions"><button type="button" class="btn small'+(confirmKey==='unsee'?' armed':'')+'" data-act="unsee">'+(confirmKey==='unsee'?'Confirmer : tout remettre à « pas vu »':'Remettre les '+seenCount+' films vus à « pas vu »')+'</button></div>':'');
+  renderFilmList();
+}
+function renderFilmList(){
+  var q=norm(query.trim());
+  var list=data.films.slice().sort(function(a,b){return a.title.localeCompare(b.title,'fr');}).filter(function(f){return !q||norm(f.title).indexOf(q)>-1;});
+  $('#filmCount').textContent=data.films.length+' film'+(data.films.length>1?'s':'')+(q?' · '+list.length+' trouvé'+(list.length>1?'s':''):'');
+  if(!list.length){$('#filmList').innerHTML='<li class="empty">Aucun film à afficher.</li>';return;}
+  $('#filmList').innerHTML=list.map(function(f){
+    var armed=confirmKey==='fdel:'+f.id;
+    var tags=filmTags(f).map(function(t){return esc(t.label);}).join(' · ');
+    return '<li class="film"><div><div class="f-title">'+esc(f.title)+(f.year?'<span class="yr">'+f.year+'</span>':'')+(f.seen?'<span class="badge">Déjà vu</span>':'')+'</div>'+(tags?'<div class="f-tags">'+tags+'</div>':'')+'</div>'+
+      '<div class="f-act"><button type="button" class="btn small" data-act="edit" data-id="'+esc(f.id)+'">Modifier</button><button type="button" class="btn small '+(armed?'armed':'danger')+'" data-act="fdel" data-id="'+esc(f.id)+'">'+(armed?'Confirmer':'Supprimer')+'</button></div></li>';
+  }).join('');
+}
+function eraHint(y){
+  var e=eraOf(y);
+  return e?'Époque : « '+optOf(ERA,e).label+' »':'Sans année valide, ce film ne sera pas proposé quand on choisit une époque.';
+}
+function formHtml(){
+  var d=editing.draft;
+  var h='<form class="form" id="filmForm" novalidate><h2>'+(editing.id?'Modifier le film':'Ajouter un film')+'</h2>'+
+    '<div class="row2"><div class="field"><label class="lab" for="f-title">Titre</label><input class="in" id="f-title" type="text" value="'+esc(d.title)+'" autocomplete="off"></div>'+
+    '<div class="field"><label class="lab" for="f-year">Année</label><input class="in" id="f-year" type="number" inputmode="numeric" min="1880" max="2100" value="'+esc(d.year)+'"></div></div>'+
+    '<p class="note-line" id="eraHint">'+esc(eraHint(d.year))+'</p>'+
+    '<div class="field"><label class="lab" for="f-age">Âge minimum conseillé (en années)</label><input class="in" id="f-age" type="number" inputmode="numeric" min="0" max="18" value="'+esc(d.age)+'" style="max-width:160px"><p class="note-line">Le film est proposé quand l\'âge choisi est égal ou supérieur. Sans âge, il n\'apparaît pas quand on filtre par âge.</p></div>';
+  data.criteria.forEach(function(c,i){
+    h+='<div class="field crit" style="--cc:var(--c'+(i%6)+');margin:0"><span class="lab">'+esc(c.label)+' <span class="muted">(plusieurs réponses possibles)</span></span><div class="chips" role="group" aria-label="'+esc(c.label)+'">';
+    c.options.forEach(function(o){
+      var on=(d.tags[c.id]||[]).indexOf(o.id)>-1;
+      h+='<button type="button" class="chip" data-act="ftag" data-c="'+esc(c.id)+'" data-o="'+esc(o.id)+'" aria-pressed="'+on+'"><span>'+esc(o.label)+'</span></button>';
+    });
+    h+='</div></div>';
+  });
+  h+='<div class="field"><label class="lab" for="f-note">Remarque (facultatif)</label><textarea class="in" id="f-note" placeholder="Résumé en une phrase, âge conseillé, durée…">'+esc(d.note)+'</textarea></div>'+
+    '<label class="switch" for="f-seen"><input type="checkbox" id="f-seen"'+(d.seen?' checked':'')+'><span>Déjà vu</span></label>'+
+    '<p class="err" id="formErr" role="alert"></p>'+
+    '<div class="form-act"><button type="button" class="btn primary" data-act="save">Enregistrer</button><button type="button" class="btn" data-act="cancel">Annuler</button></div></form>';
+  return h;
+}
+function startEdit(id){
+  var f=id?data.films.filter(function(x){return x.id===id;})[0]:null;
+  var tags={};
+  data.criteria.forEach(function(c){tags[c.id]=f?(f.tags[c.id]||[]).slice():[];});
+  editing={id:f?f.id:null,draft:{title:f?f.title:'',year:f&&f.year?String(f.year):'',age:f&&f.age!=null?String(f.age):'',note:f?f.note:'',seen:f?f.seen:false,tags:tags}};
+  renderFilms();
+  var t=$('#f-title');if(t)t.focus();
+  window.scrollTo(0,0);
+}
+function saveFilm(){
+  var d=editing.draft,err=$('#formErr');
+  var title=d.title.trim();
+  if(!title){err.textContent='Donnez un titre au film.';$('#f-title').focus();return;}
+  var y=null;
+  if(String(d.year).trim()!==''){
+    y=parseInt(d.year,10);
+    if(!(y>=1880&&y<=2100)){err.textContent='L\'année doit être comprise entre 1880 et 2100.';$('#f-year').focus();return;}
+  }
+  var ag=null;
+  if(String(d.age).trim()!==''){
+    ag=parseInt(d.age,10);
+    if(!(ag>=0&&ag<=18)){err.textContent='L\'âge doit être compris entre 0 et 18.';$('#f-age').focus();return;}
+  }
+  var obj={title:title,year:y,age:ag,tags:d.tags,note:d.note.trim(),seen:d.seen};
+  if(editing.id){
+    var f=data.films.filter(function(x){return x.id===editing.id;})[0];
+    Object.assign(f,obj);
+  }else{
+    obj.id=uid('f');data.films.push(obj);
+  }
+  save();editing=null;renderFilms();toast('Film enregistré');window.scrollTo(0,0);
+}
+
+/* ---------- Réglages ---------- */
+function renderSettings(){
+  var el=$('#panel-settings');
+  var h='';
+  if(!storageOK)h+='<p class="warn" role="alert">Ce navigateur ne peut pas enregistrer la liste. Copiez la sauvegarde plus bas pour ne rien perdre.</p>';
+  h+='<section class="sect"><h2>Critères</h2><p class="muted">Ce sont les questions posées aux enfants. Vous pouvez reformuler, ajouter ou retirer des réponses. Retirer une réponse la supprime aussi des films concernés.</p>';
+  data.criteria.forEach(function(c,i){
+    var ck='cdel:'+c.id,carm=confirmKey===ck;
+    h+='<div class="card crit" style="--cc:var(--c'+(i%6)+');margin:0"><div class="field"><label class="lab" for="cl-'+esc(c.id)+'">Question</label><input class="in" id="cl-'+esc(c.id)+'" data-act="clabel" data-c="'+esc(c.id)+'" value="'+esc(c.label)+'"></div><ul class="opts">';
+    c.options.forEach(function(o){
+      var ok='odel:'+c.id+':'+o.id,oarm=confirmKey===ok;
+      h+='<li class="opt"><input class="in" data-act="olabel" data-c="'+esc(c.id)+'" data-o="'+esc(o.id)+'" value="'+esc(o.label)+'" aria-label="Réponse"><button type="button" class="btn small '+(oarm?'armed':'danger')+'" data-act="odel" data-c="'+esc(c.id)+'" data-o="'+esc(o.id)+'">'+(oarm?'Confirmer':'Retirer')+'</button></li>';
+    });
+    h+='</ul><div class="add"><input class="in" id="add-'+esc(c.id)+'" data-enter="oadd" data-c="'+esc(c.id)+'" placeholder="Nouvelle réponse" aria-label="Nouvelle réponse pour : '+esc(c.label)+'"><button type="button" class="btn small" data-act="oadd" data-c="'+esc(c.id)+'">Ajouter</button></div>'+
+      '<div><button type="button" class="btn small '+(carm?'armed':'danger')+'" data-act="cdel" data-c="'+esc(c.id)+'">'+(carm?'Confirmer la suppression du critère':'Supprimer ce critère')+'</button></div></div>';
+  });
+  h+='<div class="card"><h3>À quelle époque ?</h3><p class="muted">Ce critère se calcule tout seul avec l\'année du film : avant 1960, 1960 à 1979, 1980 à 1999, 2000 à 2009, 2010 à 2019, 2020 et après. Une année pile (par exemple 2000) va dans la tranche qui commence cette année-là.</p></div>';
+  h+='<div class="card"><h3>Quel âge ont les enfants ?</h3><p class="muted">Ce critère se règle avec l\'âge minimum conseillé de chaque film (champ « Âge » dans l\'onglet Films). Si vous choisissez 10 ans, l\'appli propose les films conseillés dès 10 ans ou moins. Les âges de départ sont des estimations : corrigez-les selon votre avis.</p></div>';
+  h+='<div class="card"><h3>Nouveau critère</h3><div class="field"><label class="lab" for="nc-label">Question</label><input class="in" id="nc-label" placeholder="Par exemple : Quelle durée ?"></div><div class="field"><label class="lab" for="nc-opts">Réponses (une par ligne)</label><textarea class="in" id="nc-opts" placeholder="Un film court&#10;Un film long"></textarea></div><p class="err" id="ncErr" role="alert"></p><div><button type="button" class="btn small" data-act="cadd">Ajouter le critère</button></div></div></section>';
+  h+='<section class="sect"><h2>Sauvegarde</h2><p class="muted">La liste est enregistrée dans ce navigateur. Pour la garder ailleurs ou la passer sur un autre appareil, copiez le texte de sauvegarde, puis collez-le là-bas.</p>'+
+    '<div class="field"><label class="lab" for="backup">Texte de sauvegarde</label><textarea class="in" id="backup" spellcheck="false" placeholder="Appuyez sur « Copier la sauvegarde », ou collez ici une sauvegarde à importer.">'+esc(backupText)+'</textarea></div>'+
+    '<div class="form-act"><button type="button" class="btn primary" data-act="export">Copier la sauvegarde</button><button type="button" class="btn'+(confirmKey==='import'?' armed':'')+'" data-act="import">'+(confirmKey==='import'?'Confirmer : remplacer la liste':'Importer ce texte')+'</button></div>'+
+    '<div class="field"><label class="lab" for="fileImport">Ou charger un fichier de sauvegarde</label><input class="in" id="fileImport" type="file" accept=".json,.txt,application/json,text/plain"></div>'+
+    '<div><button type="button" class="btn small '+(confirmKey==='reset'?'armed':'danger')+'" data-act="reset">'+(confirmKey==='reset'?'Confirmer : revenir à la liste d\'origine':'Revenir à la liste d\'origine')+'</button></div></section>';
+  el.innerHTML=h;
+}
+function afterChange(){
+  save();
+  // retire les sélections devenues invalides
+  Object.keys(sel).forEach(function(k){
+    var c=allCrit().filter(function(x){return x.id===k;})[0];
+    if(!c||!optOf(c,sel[k]))delete sel[k];
+  });
+  shown={};
+}
+
+/* ---------- événements ---------- */
+document.addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]');
+  if(!b||b.tagName==='INPUT')return;
+  var act=b.dataset.act,k=keyOf(b);
+  var destructive={fdel:1,unsee:1,odel:1,cdel:1,reset:1,import:1};
+  var hadConfirm=confirmKey;
+  if(!destructive[act])confirmKey=null;
+
+  if(act==='tab'){showTab(b.dataset.tab);return;}
+  if(act==='pick'){
+    if(b.getAttribute('aria-disabled')==='true')return;
+    var c=b.dataset.c,o=b.dataset.o;
+    if(sel[c]===o)delete sel[c];else sel[c]=o;
+    shown={};renderChoose();refocus(k);return;
+  }
+  if(act==='clear'){sel={};shown={};renderChoose();var d=$('[data-act="draw"]');if(d)d.focus({preventScroll:true});return;}
+  if(act==='draw'){draw();return;}
+  if(act==='again'){draw();return;}
+  if(act==='close'){closeTicket();return;}
+  if(act==='watch'){
+    if(current){current.seen=true;save();toast('Bonne séance : '+current.title);}
+    closeTicket();renderChoose();return;
+  }
+  if(act==='new'){startEdit(null);return;}
+  if(act==='edit'){startEdit(b.dataset.id);return;}
+  if(act==='cancel'){editing=null;renderFilms();return;}
+  if(act==='save'){saveFilm();return;}
+  if(act==='ftag'){
+    var d2=editing.draft,arr=d2.tags[b.dataset.c]||(d2.tags[b.dataset.c]=[]),ix=arr.indexOf(b.dataset.o);
+    if(ix>-1)arr.splice(ix,1);else arr.push(b.dataset.o);
+    renderFilms();refocus(k);return;
+  }
+  if(act==='fdel'){
+    var fk='fdel:'+b.dataset.id;
+    if(confirmKey===fk){
+      data.films=data.films.filter(function(f){return f.id!==b.dataset.id;});
+      confirmKey=null;afterChange();renderFilms();toast('Film supprimé');
+    }else{confirmKey=fk;renderFilmList();refocus(k);}
+    return;
+  }
+  if(act==='unsee'){
+    if(confirmKey==='unsee'){data.films.forEach(function(f){f.seen=false;});confirmKey=null;afterChange();renderFilms();toast('Tous les films sont remis à « pas vu »');}
+    else{confirmKey='unsee';renderFilms();refocus(k);}
+    return;
+  }
+  if(act==='oadd'){
+    var cc=data.criteria.filter(function(x){return x.id===b.dataset.c;})[0];
+    var inp=document.getElementById('add-'+b.dataset.c);
+    var v=inp?inp.value.trim():'';
+    if(!cc||!v)return;
+    cc.options.push({id:uid('o'),label:v});
+    afterChange();renderSettings();refocus('#add-'+CSS.escape(b.dataset.c));return;
+  }
+  if(act==='odel'){
+    var ok='odel:'+b.dataset.c+':'+b.dataset.o;
+    if(confirmKey===ok){
+      var c2=data.criteria.filter(function(x){return x.id===b.dataset.c;})[0];
+      if(c2){
+        c2.options=c2.options.filter(function(o){return o.id!==b.dataset.o;});
+        data.films.forEach(function(f){if(f.tags[c2.id])f.tags[c2.id]=f.tags[c2.id].filter(function(x){return x!==b.dataset.o;});});
+      }
+      confirmKey=null;afterChange();renderSettings();
+    }else{confirmKey=ok;renderSettings();refocus(k);}
+    return;
+  }
+  if(act==='cdel'){
+    var ck='cdel:'+b.dataset.c;
+    if(confirmKey===ck){
+      data.criteria=data.criteria.filter(function(x){return x.id!==b.dataset.c;});
+      data.films.forEach(function(f){delete f.tags[b.dataset.c];});
+      confirmKey=null;afterChange();renderSettings();toast('Critère supprimé');
+    }else{confirmKey=ck;renderSettings();refocus(k);}
+    return;
+  }
+  if(act==='cadd'){
+    var lab=$('#nc-label').value.trim();
+    var opts=$('#nc-opts').value.split('\n').map(function(s){return s.trim();}).filter(Boolean);
+    var err=$('#ncErr');
+    if(!lab){err.textContent='Écrivez la question à poser.';$('#nc-label').focus();return;}
+    if(!opts.length){err.textContent='Ajoutez au moins une réponse.';$('#nc-opts').focus();return;}
+    var nid=uid('c');
+    data.criteria.push({id:nid,label:lab,options:opts.map(function(s){return {id:uid('o'),label:s};})});
+    data.films.forEach(function(f){f.tags[nid]=[];});
+    afterChange();renderSettings();toast('Critère ajouté. Pensez à l\'attribuer à vos films.');return;
+  }
+  if(act==='export'){
+    var json=JSON.stringify(data,null,1);
+    backupText=json;
+    var ta=$('#backup');ta.value=json;ta.focus();ta.select();
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(json).then(function(){toast('Sauvegarde copiée');},function(){toast('Texte sélectionné : copiez-le à la main');});
+    }else toast('Texte sélectionné : copiez-le à la main');
+    return;
+  }
+  if(act==='import'){
+    var parsed=null;
+    try{parsed=migrate(normalize(JSON.parse($('#backup').value)));}catch(err2){parsed=null;}
+    if(!parsed){confirmKey=null;renderSettings();toast('Ce texte n\'est pas une sauvegarde valide.');return;}
+    if(confirmKey==='import'){
+      data=parsed;sel={};shown={};confirmKey=null;backupText='';save();renderSettings();toast('Sauvegarde importée');
+    }else{confirmKey='import';renderSettings();refocus(k);}
+    return;
+  }
+  if(act==='reset'){
+    if(confirmKey==='reset'){data=seedData();sel={};shown={};confirmKey=null;save();renderSettings();toast('Liste d\'origine rétablie');}
+    else{confirmKey='reset';renderSettings();refocus(k);}
+    return;
+  }
+  if(hadConfirm&&!confirmKey){ if(tab==='films')renderFilms(); else if(tab==='settings')renderSettings(); }
+});
+
+document.addEventListener('input',function(e){
+  var t=e.target;
+  if(t.id==='q'){query=t.value;renderFilmList();return;}
+  if(!editing&&t.id!=='backup')return;
+  if(t.id==='f-title')editing.draft.title=t.value;
+  else if(t.id==='f-year'){editing.draft.year=t.value;$('#eraHint').textContent=eraHint(t.value);}
+  else if(t.id==='f-age')editing.draft.age=t.value;
+  else if(t.id==='f-note')editing.draft.note=t.value;
+  else if(t.id==='backup')backupText=t.value;
+});
+
+document.addEventListener('change',function(e){
+  var t=e.target,act=t.dataset&&t.dataset.act;
+  if(t.id==='hideSeen'){data.settings.hideSeen=t.checked;save();shown={};renderChoose();refocus('#hideSeen');return;}
+  if(t.id==='f-seen'&&editing){editing.draft.seen=t.checked;return;}
+  if(t.id==='fileImport'){
+    var file=t.files&&t.files[0];if(!file)return;
+    var r=new FileReader();
+    r.onload=function(){backupText=String(r.result||'');renderSettings();toast('Fichier chargé. Appuyez sur « Importer ce texte ».');};
+    r.onerror=function(){toast('Impossible de lire ce fichier.');};
+    r.readAsText(file);return;
+  }
+  if(act==='clabel'){
+    var c=data.criteria.filter(function(x){return x.id===t.dataset.c;})[0];
+    if(c){var v=t.value.trim();if(v)c.label=v;else t.value=c.label;save();}
+    return;
+  }
+  if(act==='olabel'){
+    var c3=data.criteria.filter(function(x){return x.id===t.dataset.c;})[0];
+    var o=c3&&optOf(c3,t.dataset.o);
+    if(o){var v2=t.value.trim();if(v2){o.label=v2;delete o.short;}else t.value=o.label;save();}
+  }
+});
+
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'&&!$('#overlay').hidden){closeTicket();return;}
+  var t=e.target;
+  if(e.key==='Enter'&&t.dataset&&t.dataset.enter==='oadd'){
+    e.preventDefault();
+    var btn=document.querySelector('[data-act="oadd"][data-c="'+CSS.escape(t.dataset.c)+'"]');
+    if(btn)btn.click();return;
+  }
+  if(e.key==='Enter'&&t.id==='f-title'){e.preventDefault();return;}
+  if((e.key==='ArrowRight'||e.key==='ArrowLeft')&&t.getAttribute&&t.getAttribute('role')==='tab'){
+    var order=['choose','films','settings'];
+    var i=order.indexOf(tab);
+    i=(i+(e.key==='ArrowRight'?1:order.length-1))%order.length;
+    showTab(order[i]);$('#tab-'+order[i]).focus();
+  }
+});
+
+showTab('choose');
+if(migrated)toast(addedCount>0?addedCount+' films ajoutés, avec un âge conseillé estimé':'Filtre d\'âge ajouté : âges estimés, à vérifier');
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}
+</script>
+</body>
+</html>

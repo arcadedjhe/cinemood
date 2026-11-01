@@ -165,6 +165,7 @@ textarea.in{min-height:96px;resize:vertical;line-height:1.4}
 <body>
 
 
+
 <div class="app">
   <header class="top">
     <svg width="56" height="36" viewBox="0 0 56 36" aria-hidden="true"><path d="M6 2h44a4 4 0 0 1 4 4v6a6 6 0 0 0 0 12v6a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4v-6a6 6 0 0 0 0-12V6a4 4 0 0 1 4-4z" fill="var(--c1)" stroke="var(--ink)" stroke-width="2.5"/><path d="M38 7v22" stroke="var(--ink)" stroke-width="2.5" stroke-dasharray="3 3" fill="none"/></svg>
@@ -730,12 +731,44 @@ function renderSettings(){
   h+='<div class="card"><h3>À quelle époque ?</h3><p class="muted">Ce critère se calcule tout seul avec l\'année du film : avant 1960, 1960 à 1979, 1980 à 1999, 2000 à 2009, 2010 à 2019, 2020 et après. Une année pile (par exemple 2000) va dans la tranche qui commence cette année-là.</p></div>';
   h+='<div class="card"><h3>Quel âge ont les enfants ?</h3><p class="muted">Ce critère se règle avec l\'âge minimum conseillé de chaque film (champ « Âge » dans l\'onglet Films). Si vous choisissez 10 ans, l\'appli propose les films conseillés dès 10 ans ou moins. Les âges de départ sont des estimations : corrigez-les selon votre avis.</p></div>';
   h+='<div class="card"><h3>Nouveau critère</h3><div class="field"><label class="lab" for="nc-label">Question</label><input class="in" id="nc-label" placeholder="Par exemple : Quelle durée ?"></div><div class="field"><label class="lab" for="nc-opts">Réponses (une par ligne)</label><textarea class="in" id="nc-opts" placeholder="Un film court&#10;Un film long"></textarea></div><p class="err" id="ncErr" role="alert"></p><div><button type="button" class="btn small" data-act="cadd">Ajouter le critère</button></div></div></section>';
-  h+='<section class="sect"><h2>Sauvegarde</h2><p class="muted">La liste est enregistrée dans ce navigateur. Pour la garder ailleurs ou la passer sur un autre appareil, copiez le texte de sauvegarde, puis collez-le là-bas.</p>'+
+  h+='<section class="sect"><h2>Sauvegarde</h2><p class="muted">La liste est enregistrée dans ce navigateur. Pour la garder ailleurs ou la passer sur un autre appareil, copiez le texte de sauvegarde, puis collez-le là-bas. La <strong>sauvegarde légère</strong> ne garde que vos changements (films ajoutés, retirés, modifiés, vus) : le texte est court et passe dans une appli de notes. La sauvegarde complète contient tous les films et peut être trop longue.</p>'+
     '<div class="field"><label class="lab" for="backup">Texte de sauvegarde</label><textarea class="in" id="backup" spellcheck="false" placeholder="Appuyez sur « Copier la sauvegarde », ou collez ici une sauvegarde à importer.">'+esc(backupText)+'</textarea></div>'+
-    '<div class="form-act"><button type="button" class="btn primary" data-act="export">Copier la sauvegarde</button><button type="button" class="btn'+(confirmKey==='import'?' armed':'')+'" data-act="import">'+(confirmKey==='import'?'Confirmer : remplacer la liste':'Importer ce texte')+'</button></div>'+
+    '<div class="form-act"><button type="button" class="btn primary" data-act="exportlight">Copier la sauvegarde légère</button><button type="button" class="btn" data-act="export">Copier la sauvegarde complète</button><button type="button" class="btn'+(confirmKey==='import'?' armed':'')+'" data-act="import">'+(confirmKey==='import'?'Confirmer : remplacer la liste':'Importer ce texte')+'</button></div>'+
     '<div class="field"><label class="lab" for="fileImport">Ou charger un fichier de sauvegarde</label><input class="in" id="fileImport" type="file" accept=".json,.txt,application/json,text/plain"></div>'+
     '<div><button type="button" class="btn small '+(confirmKey==='reset'?'armed':'danger')+'" data-act="reset">'+(confirmKey==='reset'?'Confirmer : revenir à la liste d\'origine':'Revenir à la liste d\'origine')+'</button></div></section>';
   el.innerHTML=h;
+}
+/* ---------- sauvegarde légère : seulement les écarts avec la liste d'origine ---------- */
+function filmSig(f){
+  var t={};Object.keys(f.tags||{}).sort().forEach(function(k){t[k]=(f.tags[k]||[]).slice().sort();});
+  return JSON.stringify([f.title,f.year,f.age==null?null:f.age,f.note||'',!!f.seen,t]);
+}
+function lightBackup(){
+  var seed=seedData(),sf={},cur={};
+  seed.films.forEach(function(f){sf[f.id]=f;});
+  data.films.forEach(function(f){cur[f.id]=1;});
+  var out={light:1,seedRev:3,settings:data.settings,removed:[],changed:[],added:[]};
+  if(JSON.stringify(data.criteria)!==JSON.stringify(seed.criteria))out.criteria=data.criteria;
+  seed.films.forEach(function(f){if(!cur[f.id])out.removed.push(f.id);});
+  data.films.forEach(function(f){
+    var s=sf[f.id];
+    if(!s)out.added.push(f);
+    else if(filmSig(f)!==filmSig(s))out.changed.push(f);
+  });
+  return JSON.stringify(out);
+}
+function applyLight(L){
+  var d=seedData();
+  if(Array.isArray(L.criteria))d.criteria=L.criteria;
+  var rm={},ch={};
+  (L.removed||[]).forEach(function(id){rm[id]=1;});
+  (L.changed||[]).forEach(function(f){if(f&&f.id)ch[f.id]=f;});
+  d.films=d.films.filter(function(f){return !rm[f.id];}).map(function(f){return ch[f.id]||f;}).concat(L.added||[]);
+  if(L.settings)d.settings=L.settings;
+  d.seedRev=3;
+  var n=normalize(d);
+  if(!n)throw new Error('light');
+  return n;
 }
 function afterChange(){
   save();
@@ -833,19 +866,27 @@ document.addEventListener('click',function(e){
     data.films.forEach(function(f){f.tags[nid]=[];});
     afterChange();renderSettings();toast('Critère ajouté. Pensez à l\'attribuer à vos films.');return;
   }
-  if(act==='export'){
-    var json=JSON.stringify(data,null,1);
+  if(act==='export'||act==='exportlight'){
+    var json=(act==='exportlight')?lightBackup():JSON.stringify(data);
     backupText=json;
     var ta=$('#backup');ta.value=json;ta.focus();ta.select();
+    var kb=Math.max(1,Math.round(json.length/1000));
+    var okMsg='Sauvegarde copiée ('+kb+' ko, '+json.length+' caractères)';
     if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(json).then(function(){toast('Sauvegarde copiée');},function(){toast('Texte sélectionné : copiez-le à la main');});
+      navigator.clipboard.writeText(json).then(function(){toast(okMsg);},function(){toast('Texte sélectionné : copiez-le à la main');});
     }else toast('Texte sélectionné : copiez-le à la main');
     return;
   }
   if(act==='import'){
-    var parsed=null;
-    try{parsed=migrate(normalize(JSON.parse($('#backup').value)));}catch(err2){parsed=null;}
-    if(!parsed){confirmKey=null;renderSettings();toast('Ce texte n\'est pas une sauvegarde valide.');return;}
+    var parsed=null, raw=$('#backup').value.trim(), perr='';
+    try{
+      var obj=JSON.parse(raw);
+      parsed=(obj&&obj.light)?applyLight(obj):migrate(normalize(obj));
+    }catch(err2){
+      parsed=null;
+      if(raw&&raw.charAt(raw.length-1)!=='}')perr='Ce texte est incomplet : il a sans doute été coupé par l\'appli de notes. Utilisez la sauvegarde légère.';
+    }
+    if(!parsed){confirmKey=null;renderSettings();toast(perr||'Ce texte n\'est pas une sauvegarde valide.');return;}
     if(confirmKey==='import'){
       data=parsed;sel={};shown={};confirmKey=null;backupText='';save();renderSettings();toast('Sauvegarde importée');
     }else{confirmKey='import';renderSettings();refocus(k);}

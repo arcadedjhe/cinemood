@@ -5,7 +5,7 @@
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
-  "id": "/cinemood/",
+  "id": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#1B1F3B",

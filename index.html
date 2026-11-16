@@ -94,6 +94,9 @@ h1{font-weight:700;font-size:clamp(30px,7vw,42px);line-height:1.05;letter-spacin
 .chip[aria-disabled="true"]{opacity:.45;border-style:dashed;cursor:not-allowed}
 .switch{display:flex;align-items:center;gap:10px;margin:6px 0 4px;font-weight:600;cursor:pointer}
 .switch input{width:22px;height:22px;accent-color:var(--accent);flex:none}
+.more{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;margin:4px 0 22px;font-family:var(--display);font-size:19px;font-weight:600;border-style:dashed}
+.more .n{font:500 12px var(--mono);background:var(--bg);color:var(--muted);border-radius:8px;padding:2px 7px}
+.moresec{border-left:4px solid var(--line);padding-left:14px;margin:0 0 6px}
 .bar{position:sticky;bottom:calc(8px + env(safe-area-inset-bottom,0px));margin-top:24px;z-index:5;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 28px rgba(20,22,50,.18)}
 .bar-info{font-weight:700}
 .bar-info .big{font:700 26px var(--display);margin-right:4px}
@@ -206,188 +209,286 @@ var ERA={id:ERA_ID,label:'À quelle époque ?',options:[
   {id:'e5',label:'De 2010 à 2019',short:'2010–2019'},
   {id:'e6',label:'2020 et après',short:'Depuis 2020'}
 ]};
-
 var AGE_ID='age';
 var AGE={id:AGE_ID,label:'Quel âge ont les enfants ? (le plus jeune)',options:[8,9,10,11,12,13,14,15,16].map(function(n){return {id:'a'+n,label:n+' ans',short:'Dès '+n+' ans'};})};
-// Âge minimum conseillé (estimation, à vérifier). Un film est proposé si son âge est inférieur ou égal à l'âge choisi.
-var AGE_DATA=[
-"Le Roi Lion|6","La Reine des neiges|5","Vaiana, la légende du bout du monde|5","Toy Story|4","Le Monde de Nemo|4","Shrek|6","Moi, moche et méchant|5","Les Indestructibles|6","Ratatouille|5","WALL·E|5","Monstres & Cie|5","Là-haut|6","Coco|6","Vice-versa|6","Dragons|6","Kung Fu Panda|5","Madagascar|5","L'Âge de glace|5","Le Voyage de Chihiro|8","Mon voisin Totoro|4","Kiki la petite sorcière|5","Ponyo sur la falaise|4","Aladdin|5","La Belle et la Bête|5","La Petite Sirène|4","Peter Pan|4","Le Livre de la jungle|4","Les Aristochats|4","Mary Poppins|5","Le Magicien d'Oz|6","Peter et Elliott le dragon|5","E.T. l'extra-terrestre|7","Retour vers le futur|10","Les Goonies|10","Qui veut la peau de Roger Rabbit|8","Casper|6","Le Monde de Narnia|8","Harry Potter à l'école des sorciers|8","Wallace & Gromit : Le Mystère du lapin-garou|6","Scooby-Doo|7","Les Mitchell contre les machines|7","Encanto, la fantastique famille Madrigal|6","Le Robot sauvage|7","Lilo & Stitch|6","La Planète au trésor|7","Chicken Run|6","Basil, détective privé|5","Coraline|9","Ernest et Célestine|4","Kirikou et la sorcière|5","Le Petit Nicolas|6","Paddington|5","Matilda|7","Maman, j'ai raté l'avion|8","Babe, le cochon devenu berger|5","Sauvez Willy|6","Mulan|6","Tarzan|5","Jumanji|9",
-"La Gloire de mon père|8","Le Château de ma mère|8","Chantons sous la pluie|6","Mon nom est Personne|12","O'Brother|12","L'Ours|8","Fievel et le Nouveau Monde|5","Le Kid|6","L'Histoire sans fin|8","Stand by Me|12","Les Temps modernes|6","Sherlock Junior|6","Cinema Paradiso|10","L'Étrange Noël de monsieur Jack|7","Oscar|10","Indiana Jones : Les Aventuriers de l'arche perdue|10","The Blues Brothers|12","The Mask|12","Pirates des Caraïbes : La Malédiction du Black Pearl|10","Terminator|14","Princesse Mononoké|10","Le Château dans le ciel|7","Madame Doubtfire|8","Last Action Hero|12","Waterworld|12","Le Cinquième Élément|12","Star Wars : Un nouvel espoir|8","Nos jours heureux|10","La Grande Vadrouille|8","Le Corniaud|8","La Cuisine au beurre|8","Un jour sans fin|10","Ghostbusters|10","Jurassic Park|10","Croc-Blanc|8","Beethoven|6","Rasta Rocket|8","La Famille Addams|9","Beetlejuice|12","Le Grinch|6","Taram et le Chaudron magique|8","Les Choristes|8","Nanny McPhee|7","Charlie et la Chocolaterie|7","Iron Man|10","Les Noces funèbres|8","Les 400 coups|12","La Ferme des animaux|10","Stardust, le mystère de l'étoile|10","Les Simpson, le film|10","Avengers|10","Frankenweenie|8","Alice au pays des merveilles|4","Captain America : First Avenger|10","Ma vie de Courgette|8","Le Secret de la pyramide|10","La Ruée vers l'or|6","Super Noël|6","Didier|8","Le Géant de fer|6","Les Chevaliers de la Table ronde|8","Peter Pan (2003)|8","Tron : L'Héritage|10","Pompoko|9","Robinson & Compagnie|5","Le Dirigeable volé|8","Le Petit Frère|6","L'Homme de Rio|10","Rebelle|6","Tout en haut du monde|7","Dumbo (2019)|6","Le Peuple loup|8","L'Incroyable Aventure de Bella|7","Spider-Man : Across the Spider-Verse|10","Tempête|10","Flow, le chat qui n'avait pas peur de l'eau|7","Le Fabuleux Destin d'Amélie Poulain|12"
-];
-var AGE_MAP={};
-AGE_DATA.forEach(function(s){var i=s.lastIndexOf('|');AGE_MAP[norm(s.slice(0,i))]=parseInt(s.slice(i+1),10);});
-function ageOfTitle(t){var a=AGE_MAP[norm(t)];return a==null?null:a;}
+var DUR_ID='duree';
+var DUR={id:DUR_ID,label:'Quelle durée ?',options:[
+  {id:'court',label:'Un film court (moins de 1 h 30)',short:'Court'},
+  {id:'normal',label:'Une durée normale (1 h 30 à 2 h)',short:'Durée normale'},
+  {id:'long',label:'Un long film (plus de 2 h)',short:'Long'}
+]};
+var ESSENTIAL=['histoire','monde','ambiance'];
+var OLD_IDS=['genre','univers','ambiance','style'];
 
 var SEED_CRITERIA=[
-{id:'genre',label:"Quel genre d'histoire ?",options:[
+{id:'histoire',label:'Quelle histoire ?',options:[
   {id:'rire',label:'Rire et faire les idiots',short:'Rire'},
   {id:'aventure',label:"Partir à l'aventure",short:'Aventure'},
-  {id:'emotion',label:'Une histoire touchante ou familiale',short:'Touchant'},
+  {id:'emotion',label:'Une histoire touchante, familiale ou qui fait grandir',short:'Touchant'},
   {id:'magie',label:'De la magie et du merveilleux',short:'Magie'},
   {id:'scifi',label:'De la science-fiction et des mondes étranges',short:'Science-fiction'},
-  {id:'enquete',label:'Une enquête ou un mystère',short:'Enquête'}]},
-{id:'univers',label:'Quel univers ?',options:[
-  {id:'famille',label:'La vraie vie et la famille',short:'Famille'},
-  {id:'nature',label:'La nature et les animaux',short:'Nature et animaux'},
-  {id:'contes',label:'Les contes, la magie et les légendes',short:'Contes et légendes'},
-  {id:'espace',label:"L'espace, les robots et le futur",short:'Espace et robots'},
-  {id:'monstres',label:'Les monstres, les fantômes et le bizarre',short:'Monstres et bizarre'},
-  {id:'pirates',label:'Les pirates, les trésors et les explorateurs',short:'Pirates et explorateurs'}]},
+  {id:'enquete',label:'Une enquête ou un mystère',short:'Enquête'},
+  {id:'heros',label:'Des héros et des super-pouvoirs',short:'Héros'},
+  {id:'amitie',label:'Amitié',short:'Amitié'},
+  {id:'defi',label:'Défi et dépassement de soi',short:'Défi'}]},
+{id:'monde',label:'Dans quel monde ?',options:[
+  {id:'famille',label:'Vie de famille, école et quotidien',short:'Famille et quotidien'},
+  {id:'reel',label:'Un monde réaliste',short:'Monde réaliste'},
+  {id:'vrai',label:'Histoire vraie ou inspirée de faits réels',short:'Histoire vraie'},
+  {id:'nature',label:'Nature et animaux',short:'Nature et animaux'},
+  {id:'contes',label:'Contes et légendes',short:'Contes et légendes'},
+  {id:'moyenage',label:'Moyen Âge et chevaliers',short:'Moyen Âge'},
+  {id:'passe',label:'Histoire et grandes époques du passé',short:'Grandes époques'},
+  {id:'pirates',label:'Pirates, trésors, explorateurs et Far West',short:'Pirates et explorateurs'},
+  {id:'espace',label:"L'espace, robots et futur",short:'Espace et robots'},
+  {id:'monstres',label:'Monstres, fantômes et bizarre',short:'Monstres et bizarre'}]},
 {id:'ambiance',label:'Quelle ambiance ?',options:[
   {id:'drole',label:'Drôle et légère',short:'Drôle'},
   {id:'feerique',label:'Merveilleuse et féerique',short:'Féerique'},
   {id:'action',label:"Pleine d'action et de suspense",short:'Action'},
   {id:'mystere',label:'Un peu mystérieuse ou effrayante',short:'Mystérieuse'},
-  {id:'emouvante',label:'Émouvante et humaine',short:'Émouvante'}]},
+  {id:'emouvante',label:'Émouvante et humaine',short:'Émouvante'},
+  {id:'chaleur',label:'Chaleureuse et réconfortante',short:'Chaleureuse'},
+  {id:'douce',label:'Douce et poétique',short:'Poétique'},
+  {id:'reflechir',label:'Qui donne à réfléchir',short:'À réfléchir'}]},
 {id:'style',label:'Quel style de cinéma ?',options:[
-  {id:'anim',label:'Dessin animé',short:'Dessin animé'},
+  {id:'anim',label:'Dessin animé 2D',short:'Dessin animé 2D'},
+  {id:'3d',label:'Dessin animé en images de synthèse (3D)',short:'Animation 3D'},
+  {id:'volume',label:'Pâte à modeler, marionnettes (stop-motion)',short:'Stop-motion'},
   {id:'acteurs',label:'Film avec de vrais acteurs',short:'Vrais acteurs'},
   {id:'mixte',label:'Mélange de dessins animés et de vrais acteurs',short:'Mélange'},
-  {id:'musique',label:'Un film avec beaucoup de musique et de chansons',short:'Musical'}]}
+  {id:'musique',label:'Un film avec beaucoup de musique et de chansons',short:'Musical'},
+  {id:'nb',label:'Noir et blanc ou film muet',short:'Noir et blanc'}]},
+{id:'pays',label:"Quel pays d'origine ?",options:[
+  {id:'fr',label:'France',short:'France'},
+  {id:'eu',label:'Europe (hors France)',short:'Europe'},
+  {id:'nord',label:'Amérique du Nord',short:'Amérique du Nord'},
+  {id:'sud',label:'Amérique du Sud',short:'Amérique du Sud'},
+  {id:'asie',label:'Asie',short:'Asie'},
+  {id:'afr',label:'Afrique',short:'Afrique'},
+  {id:'oce',label:'Océanie',short:'Océanie'}]}
 ];
 
-// titre, année, genre, univers, ambiance, style
+// id, titre, année, âge conseillé, durée (min), histoire, monde, ambiance, style, pays, déjà vu, remarque
 var SEED_FILMS=[
-["Le Roi Lion",1994,"aventure emotion","nature","emouvante action","anim musique"],
-["La Reine des neiges",2013,"magie aventure emotion","contes","feerique emouvante","anim musique"],
-["Vaiana, la légende du bout du monde",2016,"aventure magie","pirates nature","action feerique","anim musique"],
-["Toy Story",1995,"rire aventure","famille","drole action","anim"],
-["Le Monde de Nemo",2003,"aventure rire emotion","nature","drole emouvante","anim"],
-["Shrek",2001,"rire aventure magie","contes","drole","anim"],
-["Moi, moche et méchant",2010,"rire emotion","famille","drole","anim"],
-["Les Indestructibles",2004,"aventure rire","famille","action drole","anim"],
-["Ratatouille",2007,"rire emotion","nature","drole emouvante","anim"],
-["WALL·E",2008,"scifi emotion aventure","espace","emouvante","anim"],
-["Monstres & Cie",2001,"rire aventure","monstres","drole action","anim"],
-["Là-haut",2009,"aventure emotion","pirates famille","emouvante drole","anim"],
-["Coco",2017,"emotion magie","famille monstres","feerique emouvante","anim musique"],
-["Vice-versa",2015,"emotion rire","famille","emouvante drole","anim"],
-["Dragons",2010,"aventure magie","nature contes","action emouvante","anim"],
-["Kung Fu Panda",2008,"rire aventure","nature","drole action","anim"],
-["Madagascar",2005,"rire aventure","nature","drole","anim"],
-["L'Âge de glace",2002,"rire aventure","nature","drole action","anim"],
-["Le Voyage de Chihiro",2001,"magie aventure","contes monstres","feerique mystere","anim"],
-["Mon voisin Totoro",1988,"magie emotion","nature famille","feerique emouvante","anim"],
-["Kiki la petite sorcière",1989,"magie emotion","contes","feerique emouvante","anim"],
-["Ponyo sur la falaise",2008,"magie aventure","nature","feerique","anim"],
-["Aladdin",1992,"aventure magie rire","contes","feerique action drole","anim musique"],
-["La Belle et la Bête",1991,"magie emotion","contes","feerique emouvante","anim musique"],
-["La Petite Sirène",1989,"magie aventure","contes nature","feerique emouvante","anim musique"],
-["Peter Pan",1953,"aventure magie","pirates contes","feerique action","anim"],
-["Le Livre de la jungle",1967,"aventure rire","nature","drole action","anim musique"],
-["Les Aristochats",1970,"rire aventure","nature","drole","anim musique"],
-["Mary Poppins",1964,"magie rire","famille","feerique drole","mixte musique"],
-["Le Magicien d'Oz",1939,"aventure magie","contes","feerique","acteurs musique"],
-["Peter et Elliott le dragon",1977,"aventure magie","nature contes","feerique","mixte musique"],
-["E.T. l'extra-terrestre",1982,"scifi emotion aventure","espace famille","emouvante","acteurs"],
-["Retour vers le futur",1985,"scifi aventure rire","espace","action drole","acteurs"],
-["Les Goonies",1985,"aventure rire enquete","pirates","action mystere","acteurs"],
-["Qui veut la peau de Roger Rabbit",1988,"rire enquete","monstres","drole mystere","mixte"],
-["Casper",1995,"magie emotion rire","monstres","drole mystere emouvante","mixte"],
-["Le Monde de Narnia",2005,"magie aventure","contes","feerique action","acteurs"],
-["Harry Potter à l'école des sorciers",2001,"magie aventure enquete","contes monstres","feerique mystere action","acteurs"],
-["Wallace & Gromit : Le Mystère du lapin-garou",2005,"enquete rire","monstres","drole mystere","anim"],
-["Scooby-Doo",2002,"enquete rire","monstres","drole mystere","mixte"],
-["Les Mitchell contre les machines",2021,"scifi rire emotion","famille espace","drole action","anim"],
-["Encanto, la fantastique famille Madrigal",2021,"magie emotion","famille","feerique emouvante","anim musique"],
-["Le Robot sauvage",2024,"scifi emotion aventure","nature espace","emouvante","anim"],
-["Lilo & Stitch",2002,"scifi rire emotion","espace famille","drole emouvante","anim"],
-["La Planète au trésor",2002,"scifi aventure","pirates espace","action","anim"],
-["Chicken Run",2000,"rire aventure","nature","drole action","anim"],
-["Basil, détective privé",1986,"enquete rire","nature","mystere drole","anim"],
-["Coraline",2009,"magie aventure","monstres","mystere","anim"],
-["Ernest et Célestine",2012,"emotion aventure rire","nature famille","emouvante drole","anim"],
-["Kirikou et la sorcière",1998,"aventure magie","contes","feerique action","anim"],
-["Le Petit Nicolas",2009,"rire emotion","famille","drole","acteurs"],
-["Paddington",2014,"rire aventure emotion","famille nature","drole emouvante","mixte"],
-["Matilda",1996,"magie rire emotion","famille","drole emouvante","acteurs"],
-["Maman, j'ai raté l'avion",1990,"rire aventure","famille","drole","acteurs"],
-["Babe, le cochon devenu berger",1995,"rire emotion","nature","drole emouvante","acteurs"],
-["Sauvez Willy",1993,"aventure emotion","nature","emouvante","acteurs"],
-["Mulan",1998,"aventure","contes","action emouvante","anim musique"],
-["Tarzan",1999,"aventure emotion","nature","action emouvante","anim musique"],
-["Jumanji",1995,"aventure magie rire","pirates nature","action mystere","acteurs"]
-];
-
-// Ajout n°2 : fusionné automatiquement dans les listes déjà enregistrées (seedRev 2)
-var SEED_FILMS_V2=[
-["La Gloire de mon père",1990,"emotion","famille nature","emouvante","acteurs"],
-["Le Château de ma mère",1990,"emotion rire","famille nature","emouvante drole","acteurs"],
-["Chantons sous la pluie",1952,"rire","famille","drole","acteurs musique"],
-["Mon nom est Personne",1973,"rire aventure","","drole action","acteurs"],
-["O'Brother",2000,"rire aventure","contes","drole","acteurs musique"],
-["L'Ours",1988,"aventure emotion","nature","emouvante action","acteurs"],
-["Fievel et le Nouveau Monde",1986,"aventure emotion","nature famille","emouvante","anim musique"],
-["Le Kid",1921,"rire emotion","famille","drole emouvante","acteurs"],
-["L'Histoire sans fin",1984,"magie aventure","contes","feerique action emouvante","acteurs"],
-["Stand by Me",1986,"aventure emotion","famille","emouvante","acteurs"],
-["Les Temps modernes",1936,"rire","famille","drole","acteurs"],
-["Sherlock Junior",1924,"rire enquete","famille","drole mystere","acteurs"],
-["Cinema Paradiso",1988,"emotion","famille","emouvante","acteurs"],
-["L'Étrange Noël de monsieur Jack",1993,"magie aventure","monstres","mystere feerique","anim musique"],
-["Oscar",1967,"rire","famille","drole","acteurs"],
-["Indiana Jones : Les Aventuriers de l'arche perdue",1981,"aventure","pirates","action","acteurs"],
-["The Blues Brothers",1980,"rire","famille","drole action","acteurs musique"],
-["The Mask",1994,"rire magie","monstres","drole action","mixte"],
-["Pirates des Caraïbes : La Malédiction du Black Pearl",2003,"aventure magie rire","pirates monstres","action drole","acteurs"],
-["Terminator",1984,"scifi","espace","action","acteurs"],
-["Princesse Mononoké",1997,"aventure magie","nature contes","action emouvante","anim"],
-["Le Château dans le ciel",1986,"aventure magie scifi","pirates espace","action feerique","anim"],
-["Madame Doubtfire",1993,"rire emotion","famille","drole emouvante","acteurs"],
-["Last Action Hero",1993,"rire aventure","famille","drole action","acteurs"],
-["Waterworld",1995,"aventure scifi","pirates espace","action","acteurs"],
-["Le Cinquième Élément",1997,"scifi aventure rire","espace","action drole","acteurs"],
-["Star Wars : Un nouvel espoir",1977,"scifi aventure","espace","action","acteurs"],
-["Nos jours heureux",2006,"rire emotion","famille","drole emouvante","acteurs"],
-["La Grande Vadrouille",1966,"rire aventure","famille","drole action","acteurs"],
-["Le Corniaud",1965,"rire aventure","famille","drole","acteurs"],
-["La Cuisine au beurre",1963,"rire","famille","drole","acteurs"],
-["Un jour sans fin",1993,"rire magie","famille","drole emouvante","acteurs"],
-["Ghostbusters",1984,"rire scifi enquete","monstres","drole mystere action","acteurs"],
-["Jurassic Park",1993,"aventure scifi","nature","action mystere","acteurs"],
-["Croc-Blanc",1991,"aventure emotion","nature","emouvante action","acteurs"],
-["Beethoven",1992,"rire emotion","famille nature","drole","acteurs"],
-["Rasta Rocket",1993,"rire emotion","famille","drole emouvante","acteurs"],
-["La Famille Addams",1991,"rire","monstres famille","drole mystere","acteurs"],
-["Beetlejuice",1988,"rire magie","monstres","drole mystere","acteurs"],
-["Le Grinch",2000,"rire magie","famille","drole feerique","acteurs"],
-["Taram et le Chaudron magique",1985,"magie aventure","contes","feerique action mystere","anim"],
-["Les Choristes",2004,"emotion","famille","emouvante","acteurs musique"],
-["Nanny McPhee",2005,"magie rire emotion","famille","drole feerique","acteurs"],
-["Charlie et la Chocolaterie",2005,"magie rire aventure","contes","feerique drole","acteurs"],
-["Iron Man",2008,"scifi aventure","espace","action","acteurs"],
-["Les Noces funèbres",2005,"magie emotion rire","monstres","mystere feerique drole","anim musique"],
-["Les 400 coups",1959,"emotion","famille","emouvante","acteurs"],
-["La Ferme des animaux",1954,"emotion","nature","emouvante","anim"],
-["Stardust, le mystère de l'étoile",2007,"magie aventure","contes pirates","feerique action drole","acteurs"],
-["Les Simpson, le film",2007,"rire","famille","drole","anim"],
-["Avengers",2012,"scifi aventure","espace","action","acteurs"],
-["Frankenweenie",2012,"rire emotion","monstres famille","mystere drole emouvante","anim"],
-["Alice au pays des merveilles",1951,"magie aventure rire","contes","feerique drole","anim musique"],
-["Captain America : First Avenger",2011,"aventure scifi","espace","action","acteurs"],
-["Ma vie de Courgette",2016,"emotion","famille","emouvante","anim"],
-["Le Secret de la pyramide",1985,"aventure enquete","pirates","mystere action","acteurs"],
-["La Ruée vers l'or",1925,"rire aventure","pirates","drole","acteurs"],
-["Super Noël",1994,"rire magie","famille contes","drole feerique","acteurs"],
-["Didier",1997,"rire","famille nature","drole","acteurs"],
-["Le Géant de fer",1999,"scifi emotion aventure","espace famille","emouvante","anim"],
-["Les Chevaliers de la Table ronde",1953,"aventure","contes","action","acteurs"],
-["Peter Pan (2003)",2003,"aventure magie","pirates contes","feerique action","acteurs"],
-["Tron : L'Héritage",2010,"scifi aventure","espace","action","acteurs"],
-["Pompoko",1994,"magie rire emotion","nature contes","drole feerique","anim"],
-["Robinson & Compagnie",1990,"aventure emotion","pirates nature","drole emouvante","anim"],
-["Le Dirigeable volé",1967,"aventure scifi","pirates","action feerique","mixte"],
-["Le Petit Frère",1927,"rire aventure","famille","drole","acteurs"],
-["L'Homme de Rio",1964,"aventure rire","pirates","action drole","acteurs"],
-["Rebelle",2012,"aventure magie","contes","action feerique","anim"],
-["Tout en haut du monde",2015,"aventure","pirates","action emouvante","anim"],
-["Dumbo (2019)",2019,"emotion aventure","nature","emouvante feerique","mixte"],
-["Le Peuple loup",2020,"magie aventure","nature contes","feerique action","anim"],
-["L'Incroyable Aventure de Bella",2019,"aventure emotion","nature","emouvante","acteurs"],
-["Spider-Man : Across the Spider-Verse",2023,"scifi aventure","espace","action","anim"],
-["Tempête",2022,"emotion aventure","nature famille","emouvante","acteurs"],
-["Flow, le chat qui n'avait pas peur de l'eau",2024,"aventure emotion","nature","emouvante","anim"],
-["Le Fabuleux Destin d'Amélie Poulain",2001,"rire emotion","famille","drole emouvante","acteurs"]
+["f1","Le Roi Lion",1994,6,88,"aventure emotion","nature","emouvante action","anim musique","nord",0],
+["f3","Vaiana, la légende du bout du monde",2016,5,107,"aventure magie","pirates nature","action feerique","3d musique","nord",1],
+["f4","Toy Story",1995,4,81,"rire aventure amitie","famille","drole action chaleur","3d","nord",0],
+["f5","Le Monde de Nemo",2003,4,100,"aventure rire emotion","nature","drole emouvante","3d","nord",1],
+["f6","Shrek",2001,6,90,"rire aventure magie","contes","drole","3d","nord",0],
+["f7","Moi, moche et méchant",2010,5,95,"rire emotion","famille","drole chaleur","3d","nord fr",1],
+["f8","Les Indestructibles",2004,6,115,"aventure rire heros","famille","action drole","3d","nord",0],
+["f9","Ratatouille",2007,5,111,"rire emotion","nature","drole emouvante","3d","nord",0],
+["f10","WALL·E",2008,5,98,"scifi emotion aventure","espace","emouvante reflechir","3d","nord",1],
+["f11","Monstres & Cie",2001,5,92,"rire aventure amitie","monstres","drole action","3d","nord",1],
+["f12","Là-haut",2009,6,96,"aventure emotion amitie","pirates famille","emouvante drole chaleur","3d","nord",0],
+["f13","Coco",2017,6,105,"emotion magie","famille monstres","feerique emouvante chaleur","musique 3d","nord",0],
+["f14","Vice-versa",2015,6,95,"emotion rire","famille","emouvante drole reflechir","3d","nord",1],
+["f15","Dragons",2010,6,98,"aventure magie","nature contes","action emouvante","3d","nord",0],
+["f17","Madagascar",2005,5,86,"rire aventure amitie","nature","drole","3d","nord",1],
+["f18","L'Âge de glace",2002,5,81,"rire aventure","nature","drole action","3d","nord",1],
+["f19","Le Voyage de Chihiro",2001,8,125,"magie aventure","contes monstres","feerique mystere","anim","asie",0],
+["f20","Mon voisin Totoro",1988,4,86,"magie emotion","nature famille","feerique emouvante chaleur douce","anim","asie",1],
+["f21","Kiki la petite sorcière",1989,5,103,"magie emotion","contes","feerique emouvante chaleur douce","anim","asie",0],
+["f22","Ponyo sur la falaise",2008,4,101,"magie aventure","nature","feerique douce","anim","asie",1],
+["f23","Aladdin",1992,5,90,"aventure magie rire","contes","feerique action drole","anim musique","nord",0],
+["f24","La Belle et la Bête",1991,5,84,"magie emotion","contes","feerique emouvante","anim musique","nord",0],
+["f25","La Petite Sirène",1989,4,83,"magie aventure","contes nature","feerique emouvante","anim musique","nord",0],
+["f26","Peter Pan",1953,4,77,"aventure magie","pirates contes","feerique action","anim","nord",0],
+["f27","Le Livre de la jungle",1967,4,78,"aventure rire","nature","drole action","anim musique","nord",0],
+["f28","Les Aristochats",1970,4,78,"rire aventure","nature","drole","anim musique","nord",0],
+["f29","Mary Poppins",1964,5,139,"magie rire","famille passe","feerique drole chaleur","mixte musique","nord",0],
+["f30","Le Magicien d'Oz",1939,6,102,"aventure magie","contes","feerique","acteurs musique","nord",1],
+["f31","Peter et Elliott le dragon",1977,5,128,"aventure magie","nature contes","feerique","mixte musique","nord",0],
+["f32","E.T. l'extra-terrestre",1982,7,115,"scifi emotion aventure","espace famille","emouvante","acteurs","nord",0],
+["f33","Retour vers le futur",1985,10,116,"scifi aventure rire","espace","action drole","acteurs","nord",1],
+["f34","Les Goonies",1985,10,114,"aventure rire enquete amitie","pirates","action mystere","acteurs","nord",0],
+["f35","Qui veut la peau de Roger Rabbit",1988,8,104,"rire enquete","monstres","drole mystere","mixte","nord",0],
+["f36","Casper",1995,6,100,"magie emotion rire","monstres","drole mystere emouvante","mixte","nord",0],
+["f37","Le Monde de Narnia",2005,8,143,"magie aventure","contes","feerique action","acteurs","nord eu",1],
+["f38","Harry Potter à l'école des sorciers",2001,8,152,"magie aventure enquete","contes monstres","feerique mystere action","acteurs","eu nord",0],
+["f39","Wallace & Gromit : Le Mystère du lapin-garou",2005,6,85,"enquete rire","monstres","drole mystere","volume","eu nord",0],
+["f41","Les Mitchell contre les machines",2021,7,109,"scifi rire emotion","famille espace","drole action","3d","nord asie",0],
+["f42","Encanto, la fantastique famille Madrigal",2021,6,102,"magie emotion","famille","feerique emouvante chaleur","musique 3d","nord",0],
+["f43","Le Robot sauvage",2024,7,102,"scifi emotion aventure amitie","nature espace","emouvante douce reflechir","3d","nord",1],
+["f44","Lilo & Stitch",2002,6,85,"scifi rire emotion","espace famille","drole emouvante chaleur","anim","nord",0],
+["f45","La Planète au trésor",2002,7,95,"scifi aventure","pirates espace","action","anim","nord",0],
+["f46","Chicken Run",2000,6,84,"rire aventure","nature","drole action","volume","eu nord fr",0],
+["f47","Basil, détective privé",1986,5,74,"enquete rire","nature","mystere drole","anim","nord",0],
+["f48","Coraline",2009,9,100,"magie aventure","monstres","mystere","volume","nord",0],
+["f49","Ernest et Célestine",2012,4,80,"emotion aventure rire amitie","nature famille","emouvante drole chaleur douce","anim","eu fr",0],
+["f50","Kirikou et la sorcière",1998,5,71,"aventure magie","contes","feerique action","anim","fr eu",0],
+["f51","Le Petit Nicolas",2009,6,91,"rire emotion amitie","famille reel","drole chaleur","acteurs","fr eu",0],
+["f52","Paddington",2014,5,95,"rire aventure emotion","famille nature","drole emouvante chaleur","mixte","eu fr",1],
+["f53","Matilda",1996,7,98,"magie rire emotion","famille","drole emouvante","acteurs","nord",0],
+["f54","Maman, j'ai raté l'avion",1990,8,103,"rire aventure","famille reel","drole","acteurs","nord",1],
+["f55","Babe, le cochon devenu berger",1995,5,95,"rire emotion","nature","drole emouvante chaleur","acteurs","oce nord",0],
+["f56","Sauvez Willy",1993,6,112,"aventure emotion","nature reel","emouvante","acteurs","nord fr",0],
+["f57","Mulan",1998,6,88,"aventure defi","contes passe","action emouvante","anim musique","nord",0],
+["f58","Tarzan",1999,5,88,"aventure emotion","nature","action emouvante","anim musique","nord",1],
+["f59","Jumanji",1995,9,104,"aventure magie rire","pirates nature","action mystere","acteurs","nord",0],
+["g1","La Gloire de mon père",1990,8,105,"emotion","famille nature reel","emouvante chaleur douce","acteurs","fr",0],
+["g2","Le Château de ma mère",1990,8,98,"emotion rire","famille nature reel","emouvante drole chaleur douce","acteurs","fr",0],
+["g3","Chantons sous la pluie",1952,6,103,"rire","famille reel","drole chaleur","acteurs musique","nord",0],
+["g4","Mon nom est Personne",1973,12,118,"rire aventure","pirates passe","drole action","acteurs","eu fr",0],
+["g5","O'Brother",2000,12,107,"rire aventure","contes","drole","acteurs musique","eu nord fr",0],
+["g6","L'Ours",1988,8,94,"aventure emotion","nature reel","emouvante action","acteurs","fr",0],
+["g7","Fievel et le Nouveau Monde",1986,5,76,"aventure emotion","nature famille","emouvante","anim musique","nord",0],
+["g8","Le Kid",1921,6,68,"rire emotion","famille reel","drole emouvante reflechir","acteurs nb","nord",0],
+["g9","L'Histoire sans fin",1984,8,94,"magie aventure","contes","feerique action emouvante","acteurs","eu nord",0],
+["g10","Stand by Me",1986,12,89,"aventure emotion amitie","famille reel","emouvante","acteurs","nord",0],
+["g11","Les Temps modernes",1936,6,87,"rire","famille reel","drole reflechir","acteurs nb","nord",0],
+["g12","Sherlock Junior",1924,6,45,"rire enquete","famille reel","drole mystere","acteurs nb","nord",0],
+["g13","Cinema Paradiso",1988,10,155,"emotion","famille reel","emouvante douce reflechir","acteurs","eu fr",0],
+["g14","L'Étrange Noël de monsieur Jack",1993,7,76,"magie aventure","monstres","mystere feerique","musique volume","nord",0],
+["g15","Oscar",1967,10,85,"rire","famille reel","drole","acteurs","fr",0],
+["g16","Indiana Jones : Les Aventuriers de l'arche perdue",1981,10,115,"aventure","pirates passe","action","acteurs","nord",0],
+["g17","The Blues Brothers",1980,12,133,"rire","famille","drole action","acteurs musique","nord",0],
+["g18","The Mask",1994,12,101,"rire magie","monstres","drole action","mixte","nord",0],
+["g19","Pirates des Caraïbes : La Malédiction du Black Pearl",2003,10,143,"aventure magie rire","pirates monstres","action drole","acteurs","nord",0],
+["g20","Terminator",1984,14,107,"scifi","espace","action","acteurs","nord",0],
+["g21","Princesse Mononoké",1997,10,135,"aventure magie","nature contes passe","action emouvante reflechir","anim","asie",0],
+["g22","Le Château dans le ciel",1986,7,124,"aventure magie scifi","pirates espace","action feerique","anim","asie",0],
+["g23","Madame Doubtfire",1993,8,125,"rire emotion","famille reel","drole emouvante","acteurs","nord",0],
+["g24","Last Action Hero",1993,12,130,"rire aventure","famille","drole action","acteurs","nord",0],
+["g25","Waterworld",1995,12,136,"aventure scifi","pirates espace","action","acteurs","nord",0],
+["g26","Le Cinquième Élément",1997,12,126,"scifi aventure rire","espace","action drole","acteurs","fr eu nord",0],
+["g27","Star Wars : Un nouvel espoir",1977,8,121,"scifi aventure","espace","action","acteurs","nord",1],
+["g28","Nos jours heureux",2006,10,103,"rire emotion","famille reel","drole emouvante chaleur","acteurs","fr",0],
+["g29","La Grande Vadrouille",1966,8,132,"rire aventure","passe reel","drole action","acteurs","fr eu",0],
+["g30","Le Corniaud",1965,8,110,"rire aventure","famille reel","drole","acteurs","fr eu",0],
+["g31","La Cuisine au beurre",1963,8,82,"rire","famille reel","drole","acteurs nb","fr",0],
+["g32","Un jour sans fin",1993,10,101,"rire magie","famille","drole emouvante reflechir","acteurs","nord",0],
+["g33","Ghostbusters",1984,10,105,"rire scifi enquete","monstres","drole mystere action","acteurs","nord",0],
+["g34","Jurassic Park",1993,10,127,"aventure scifi","nature","action mystere","acteurs","nord",0],
+["g35","Croc-Blanc",1991,8,107,"aventure emotion","nature reel","emouvante action","acteurs","nord",0],
+["g36","Beethoven",1992,6,87,"rire emotion","famille nature reel","drole chaleur","acteurs","nord",0],
+["g37","Rasta Rocket",1993,8,98,"rire emotion defi","famille reel","drole emouvante","acteurs","nord",0],
+["g38","La Famille Addams",1991,9,99,"rire","monstres famille","drole mystere","acteurs","nord",0],
+["g39","Beetlejuice",1988,12,92,"rire magie","monstres","drole mystere","acteurs","nord",0],
+["g40","Le Grinch",2000,6,104,"rire magie","famille","drole feerique chaleur","acteurs","eu nord",0],
+["g41","Taram et le Chaudron magique",1985,8,80,"magie aventure","contes moyenage","feerique action mystere","anim","nord",0],
+["g42","Les Choristes",2004,8,97,"emotion","famille passe","emouvante chaleur reflechir","acteurs musique","fr eu",0],
+["g43","Nanny McPhee",2005,7,97,"magie rire emotion","famille","drole feerique chaleur","acteurs","fr eu nord",0],
+["g44","Charlie et la Chocolaterie",2005,7,115,"magie rire aventure","contes","feerique drole","acteurs","eu nord",0],
+["g45","Iron Man",2008,10,126,"scifi aventure heros","espace","action","acteurs","nord",0],
+["g46","Les Noces funèbres",2005,8,77,"magie emotion rire","monstres","mystere feerique drole","musique volume","nord",0],
+["g47","Les 400 coups",1959,12,100,"emotion","famille reel","emouvante reflechir","acteurs nb","fr",0],
+["g48","La Ferme des animaux",1954,10,73,"emotion","nature","emouvante reflechir","anim","eu",0],
+["g50","Les Simpson, le film",2007,10,87,"rire","famille","drole","anim","nord",0],
+["g51","Avengers",2012,10,143,"scifi aventure heros","espace","action","acteurs","nord",0],
+["g52","Frankenweenie",2012,8,87,"rire emotion","monstres famille","mystere drole emouvante","volume nb","nord",0],
+["g53","Alice au pays des merveilles",1951,4,75,"magie aventure rire","contes","feerique drole","anim musique","nord",0],
+["g54","Captain America : First Avenger",2011,10,124,"aventure scifi heros","passe","action","acteurs","nord",0],
+["g55","Ma vie de Courgette",2016,8,66,"emotion amitie","famille reel","emouvante chaleur reflechir","volume","fr eu",0],
+["g56","Le Secret de la pyramide",1985,10,109,"aventure enquete","passe","mystere action","acteurs","nord",0],
+["g57","La Ruée vers l'or",1925,6,95,"rire aventure","passe pirates","drole","acteurs nb","nord",0],
+["g58","Super Noël",1994,6,97,"rire magie","famille contes","drole feerique chaleur","acteurs","nord",0],
+["g59","Didier",1997,8,107,"rire","famille nature reel","drole","acteurs","fr",0],
+["g60","Le Géant de fer",1999,6,87,"scifi emotion aventure amitie","espace famille","emouvante reflechir","anim","nord",0],
+["g62","Peter Pan (2003)",2003,8,113,"aventure magie","pirates contes","feerique action","acteurs","eu nord oce",0],
+["g63","Tron : L'Héritage",2010,10,125,"scifi aventure","espace","action","acteurs","nord",0],
+["g64","Pompoko",1994,9,119,"magie rire emotion","nature contes","drole feerique reflechir","anim","asie",0],
+["g65","Robinson & Compagnie",1990,5,70,"aventure emotion","pirates nature","drole emouvante","anim","fr",0],
+["g66","Le Dirigeable volé",1967,8,93,"aventure scifi","pirates","action feerique","mixte","eu",0],
+["g67","Le Petit Frère",1927,6,84,"rire aventure","famille reel","drole","acteurs nb","nord",0],
+["g68","L'Homme de Rio",1964,10,112,"aventure rire","pirates reel","action drole","acteurs","fr eu",0],
+["g69","Rebelle",2012,6,93,"aventure magie","contes moyenage","action feerique","3d","nord",0],
+["g71","Dumbo (2019)",2019,6,112,"emotion aventure","nature passe","emouvante feerique douce","mixte","nord",0],
+["g72","Le Peuple loup",2020,8,103,"magie aventure","nature contes","feerique action","anim","eu fr",1],
+["g73","L'Incroyable Aventure de Bella",2019,7,96,"aventure emotion","nature reel","emouvante","acteurs","nord",0],
+["g75","Tempête",2022,10,110,"emotion aventure defi","nature famille reel","emouvante","acteurs","fr nord",0],
+["g76","Flow, le chat qui n'avait pas peur de l'eau",2024,7,85,"aventure emotion","nature","emouvante douce reflechir","3d","eu fr",0],
+["g77","Le Fabuleux Destin d'Amélie Poulain",2001,12,123,"rire emotion","famille reel","drole emouvante","acteurs","fr eu",0],
+["flms0a1x9q","L'appel de la forêt",2020,8,100,"aventure","nature reel","emouvante action","acteurs","nord",0],
+["fhvcrpt46j","Le dernier jaguar",2024,7,100,"aventure emotion","nature reel","action emouvante","acteurs","fr nord eu",0],
+["fb3wcl2lht","Forrest Gump",1994,12,142,"emotion","famille reel","drole emouvante reflechir","acteurs","nord",0],
+["f9p05o5smn","Peter et Elliot le dragon (2016)",2016,7,103,"aventure emotion","nature contes","feerique action emouvante","mixte","nord",0],
+["f0g333iojn","Le chant de la mer",2014,6,93,"emotion magie aventure","nature contes","feerique emouvante action douce","anim","eu fr",0],
+["fl91inx9oc","Star wars : l'empire contre-attaque",1980,8,124,"scifi aventure","espace","action feerique","acteurs","nord",0],
+["f5y5kf2k9e","Star wars : le retour du Jedi",1983,8,131,"aventure scifi","espace","feerique action","acteurs","nord",0],
+["fgvhm37moi","Star wars : la menace fantôme",1999,8,136,"aventure scifi","espace","feerique action","acteurs","nord",0],
+["fihdnljqgf","Star wars : la revanche des siths",2005,10,140,"aventure scifi","espace","feerique action mystere","acteurs","nord",0],
+["f8ih2eberh","Fantômas",1964,10,105,"aventure enquete rire","monstres reel","drole mystere","acteurs","fr eu",0],
+["fbmyycpvkj","Le renard et l'enfant",2007,7,92,"emotion amitie","nature contes","feerique emouvante douce","acteurs","fr",0],
+["fezpa7v7t4","Batman",1989,11,126,"aventure scifi enquete heros","monstres","action mystere","acteurs","nord eu",0],
+["fta2bbw2ip","Batman : le défi",1992,13,126,"aventure scifi enquete heros","monstres","mystere action","acteurs","nord eu",0],
+["falsqc18zd","Batman begins",2005,12,140,"aventure scifi enquete heros","reel","mystere action","acteurs","nord eu",0],
+["flvbzip5rx","The dark knight",2008,14,152,"aventure scifi enquete heros","reel","action mystere","acteurs","nord eu",0],
+["f257m6017q","The dark knight rises",2012,13,164,"aventure scifi enquete heros","reel","action mystere","acteurs","nord eu",0],
+["fb5y3686ou","The batman",2022,14,176,"aventure enquete scifi heros","reel","action mystere","acteurs","nord",0],
+["fuo03k0lpp","Karaté kid",1984,10,126,"emotion defi","famille reel","emouvante action","acteurs","nord",0],
+["fpeu6tg7dq","Indiana Jones et le temple maudit",1984,12,118,"aventure magie enquete","pirates passe","drole action mystere","acteurs","nord",0],
+["fwkmpmhdn4","Indiana Jones et la dernière croisade",1989,10,127,"aventure enquete magie","pirates passe","drole action mystere","acteurs","nord",0],
+["fkr1tzlo9r","Indiana Jones et le royaume du crâne de cristal",2008,11,122,"aventure scifi enquete","pirates passe","action drole mystere","acteurs","nord",0],
+["frjjusc29w","Indiana Jones et le cadran de la destinée",2023,12,154,"aventure scifi enquete magie","pirates passe","mystere action","acteurs","nord",0],
+["f7a7o724l7","Crocodile dundee",1986,9,97,"aventure rire","nature pirates reel","drole action","acteurs","oce nord",0],
+["fe5ak1wblk","Gremlins",1984,12,106,"aventure scifi","monstres","mystere action","acteurs","nord",0],
+["fj4i2sp811","Gremlins 2",1990,12,106,"rire scifi","monstres","drole mystere","acteurs","nord",0],
+["f6dj9k5hzf","Chérie, j'ai agrandi le bébé",1992,8,89,"rire aventure scifi","espace","drole action","acteurs","nord",0],
+["flnuo0jevx","Le masque de Zorro",1998,10,136,"aventure heros","passe pirates","drole action","acteurs","nord eu",0],
+["f0i2ednpgi","Princess Bride",1988,8,98,"aventure emotion","contes moyenage","drole feerique action","acteurs","nord",0],
+["f0q7vsfjm5","Robin des bois, prince des voleurs",1991,12,143,"aventure heros","moyenage","action mystere","acteurs","nord eu fr",0],
+["f6augckxgw","Les trois mousquetaires : D'Artagnan",2023,12,121,"aventure","passe","action mystere","acteurs","fr eu",0],
+["focp7wli3o","Avengers : L'ère d'Ultron",2015,12,141,"aventure scifi heros","espace","mystere action","acteurs","nord",0],
+["fumk9rx6th","Avengers : Infinity war",2018,12,149,"aventure scifi heros","espace","mystere action","acteurs","nord",0],
+["f78jnuj3yc","Avengers : Endgame",2019,12,181,"aventure scifi heros","espace","action mystere","acteurs","nord",0],
+["f6byu7jybl","Le garçon et la bête",2015,10,119,"rire magie aventure","famille contes","drole feerique action mystere","anim","asie",0],
+["fzj98dwcer","Togo",2019,9,113,"aventure emotion defi","nature pirates reel vrai","emouvante action","acteurs","nord",0],
+["fwapmpnusn","Le hobbit : un voyage inattendu",2012,10,169,"aventure scifi magie","contes monstres","feerique action mystere","acteurs","oce nord",0],
+["fkkpdovkip","Le hobbit : la désolation de Smaug",2013,11,161,"aventure magie scifi","contes monstres","feerique action mystere","acteurs","oce nord",0],
+["fe6dpcl3wk","Le hobbit: la bataille des cinq armées",2014,12,144,"aventure magie scifi","contes monstres","feerique action mystere","acteurs","oce nord",0],
+["fq9s2u6bak","Les nouveaux héros",2014,8,102,"aventure scifi enquete heros","espace","action mystere drole emouvante","3d","nord",0],
+["fwa6omp1iw","Les mondes de Ralph",2012,7,101,"rire aventure scifi amitie","espace","drole action emouvante","3d","nord",0],
+["f4bg0pmyic","L'odyssée de Pi",2012,12,127,"aventure emotion","nature","mystere emouvante action reflechir","acteurs","nord asie eu",0],
+["fdmfoxt35k","Avril et le monde truqué",2015,9,105,"scifi aventure enquete","espace","mystere feerique","anim","fr eu nord",0],
+["fjcu3fpy1q","Patéma et le monde inversé",2013,9,99,"aventure scifi enquete","espace","feerique mystere emouvante action","anim","asie",0],
+["fdrhrfmwzj","Toy story 3",2010,7,103,"aventure rire emotion magie amitie","famille pirates","drole feerique action emouvante chaleur","3d","nord",0],
+["flolflth2x","Toy Story 4",2019,7,100,"rire aventure emotion amitie","pirates famille","drole feerique action emouvante chaleur","3d","nord",0],
+["fdrq6jo6jq","L'incroyable histoire du facteur cheval",2018,10,105,"emotion","famille reel vrai","feerique emouvante reflechir","acteurs","fr",0],
+["flddpoo1ov","L'été de Kikujiro",1999,10,121,"emotion amitie","famille reel","emouvante douce","acteurs","asie",0],
+["ftiuv778gr","Paddington 2",2017,6,103,"rire aventure emotion enquete","famille contes","drole feerique emouvante chaleur","mixte","eu fr",0],
+["fjypwiqix9","Les gardiens de la galaxie",2014,11,121,"rire aventure scifi heros","espace","drole action","acteurs","nord",0],
+["fok7iqbob9","Les gardiens de la galaxie vol.2",2017,11,136,"rire aventure scifi heros","espace","drole action","acteurs","nord",0],
+["frpo5fepyc","Les gardiens de la galaxie vol.3",2023,13,150,"aventure scifi heros","espace","action mystere","acteurs","nord",0],
+["fvl3rzjqef","Moonrise Kingdom",2012,10,94,"aventure emotion amitie","famille nature pirates reel","feerique drole","acteurs","nord",0],
+["fkw381f50o","L'école buissonnière",2017,10,116,"emotion aventure","nature famille reel","feerique emouvante chaleur douce","acteurs","fr",0],
+["fz174blc15","Atlantide, l'empire perdu",2001,8,95,"aventure scifi enquete","pirates passe","feerique action mystere","anim","nord",0],
+["fs5ujza8ch","Spy Kids",2001,8,88,"enquete aventure scifi","espace","drole action mystere","acteurs","nord",0],
+["fwhvudcaya","Les aventures de Tintin: le secret de la licorne",2011,8,107,"aventure enquete","pirates","drole action mystere","3d","oce nord",0],
+["f4dh1uy2jw","Le dernier trappeur",2004,9,105,"aventure","famille nature reel","emouvante douce reflechir","acteurs","fr eu nord",0],
+["fjuyd8mxw3","Il était une fois",2007,7,107,"rire magie","contes","drole feerique emouvante","mixte","nord",0],
+["fb5nerdb9p","Stardust, le mystère de l'étoile",2007,10,127,"aventure magie emotion","contes","feerique mystere drole emouvante","acteurs","eu nord",0],
+["fj2u76xgvh","La légende de Manolo",2014,8,95,"rire aventure magie emotion","contes","feerique mystere","musique 3d","nord",0],
+["f03bktu1xa","Tout en haut du monde",2015,8,80,"aventure","nature famille","action emouvante","anim","fr eu",0],
+["fdcca5ibn8","Ralph 2.0",2019,8,112,"aventure scifi rire amitie","espace","drole action emouvante","3d","nord",0],
+["frcvx0ngpw","Dragons 3 : le monde caché",2019,8,104,"aventure magie emotion","contes","drole feerique action emouvante","3d","nord",0],
+["fyq2qjsi5z","Spider man : new génération",2018,10,117,"aventure scifi heros","monstres","drole action mystere emouvante","3d","nord",0],
+["f3so8tk9b2","Maléfique : Le Pouvoir du Mal",2019,10,118,"magie enquete","contes famille","feerique mystere emouvante","acteurs","nord",0],
+["ft0ygyjgwd","Spider-Man : Across the Spider-Verse",2023,10,140,"aventure scifi heros","espace famille","drole action mystere","3d","nord",0],
+["f93hl3uvs8","Mufasa : le roi lion",2024,8,118,"aventure","nature famille contes","drole mystere emouvante","3d","nord",0],
+["fv9lre0xny","Lucky Luke : La Ballade des Dalton",1978,7,82,"rire aventure enquete","pirates","drole action","anim","fr",0],
+["flf7noj0yg","Le caméraman",1928,7,76,"aventure rire","famille reel","drole feerique action","acteurs nb","nord",0],
+["fx7tzdte23","Noël chez les Muppets",1993,8,86,"emotion magie","contes monstres passe","mystere feerique","musique acteurs","nord",0],
+["fgykatdhcd","Les Valeurs de la famille Addams",1993,11,94,"rire aventure emotion","famille monstres","drole mystere feerique","acteurs","nord",0],
+["fhd1ee9eoc","Les Chevaliers de la Table ronde",1953,10,115,"aventure emotion","moyenage contes","action emouvante","acteurs","eu",0],
+["fbno9l5z6h","La dernière licorne",1982,9,93,"aventure magie enquete","contes monstres","feerique mystere emouvante","anim","nord eu asie",0],
+["fjoajht4rz","Le Dernier Round",1928,7,77,"rire defi","famille reel","drole emouvante","acteurs nb","nord",0],
+["ffskb9p3pb","Oseam",2004,9,77,"emotion","nature famille contes","feerique emouvante douce","anim","asie",0],
+["fy82h9fvb7","Les trois frères",1995,12,105,"rire emotion","famille reel","drole emouvante","acteurs","fr",0],
+["fkyttfj1mw","Le pari",1997,12,100,"rire emotion","famille reel","drole emouvante","acteurs","fr",0],
+["f2ygrp22a6","Les rois mages",2001,8,102,"rire emotion magie","passe famille","drole feerique chaleur","acteurs","fr",1],
+["f9mz98f4ju","Santa et cie",2017,7,95,"rire emotion magie","famille contes","drole feerique emouvante chaleur","acteurs","fr",0],
+["fjedbf17u5","Intouchables",2011,12,112,"rire emotion amitie","famille reel vrai","drole emouvante chaleur reflechir","acteurs","fr",0],
+["fxs4lauzd3","La folie des grandeurs",1971,8,110,"rire aventure","passe","drole action","acteurs","fr eu",0],
+["fbmbvoywu4","Les aventures de Rabbi Jacob",1973,8,97,"rire emotion","famille reel","drole emouvante","acteurs","fr eu",0],
+["f48u2nupn6","Lucky luke",1971,6,71,"aventure rire","pirates","drole action","anim","fr eu",0],
+["frou8345a7","Mais où donc est passé la septième compagnie ?",1973,10,90,"rire aventure","passe reel","drole action","acteurs","fr eu",0],
+["fxzt93pq9c","Les fugitifs",1986,10,86,"aventure rire enquete","famille reel","drole emouvante action","acteurs","fr",0],
+["f171mgie6s","Papy fait de la résistance",1983,11,107,"rire aventure","passe reel","drole","acteurs","fr",0],
+["fwwsprwdjn","Men in Black",1997,10,98,"rire aventure scifi enquete","espace","drole action mystere","acteurs","nord",0],
+["fbsjsft805","Sister act",1992,7,100,"emotion aventure rire","famille reel","drole emouvante chaleur","musique acteurs","nord",0],
+["f1j3x9mrsy","Gran Turismo",2023,10,134,"defi","famille reel vrai","action emouvante","acteurs","nord asie",0]
 ];
 
 /* ---------- utilitaires ---------- */
@@ -407,43 +508,65 @@ function eraOf(y){
 function reduced(){return window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;}
 
 /* ---------- données ---------- */
-function mkFilm(r,id,criteria){
-  var codes={genre:r[2],univers:r[3],ambiance:r[4],style:r[5]};
+function mkFilm(r,criteria){
+  var codes={histoire:r[5],monde:r[6],ambiance:r[7],style:r[8],pays:r[9]};
   var tags={};
   criteria.forEach(function(c){
     var arr=(Object.prototype.hasOwnProperty.call(codes,c.id)?codes[c.id]:'').split(' ').filter(Boolean);
     tags[c.id]=arr.filter(function(x){return c.options.some(function(o){return o.id===x;});});
   });
-  return {id:id,title:r[0],year:r[1],age:ageOfTitle(r[0]),tags:tags,note:'',seen:false};
+  return {id:r[0],title:r[1],year:r[2],age:r[3],min:r[4],tags:tags,note:r[11]||'',seen:!!r[10]};
 }
 function seedData(){
   var criteria=JSON.parse(JSON.stringify(SEED_CRITERIA));
-  var films=SEED_FILMS.map(function(r,i){return mkFilm(r,'f'+(i+1),criteria);})
-    .concat(SEED_FILMS_V2.map(function(r,i){return mkFilm(r,'g'+(i+1),criteria);}));
-  return {version:1,seedRev:3,criteria:criteria,films:films,settings:{hideSeen:true}};
+  return {version:1,seedRev:4,criteria:criteria,films:SEED_FILMS.map(function(r){return mkFilm(r,criteria);}),settings:{hideSeen:true}};
 }
-var migrated=false, addedCount=0;
+var migrated=false, migratedCount=0;
+/* Convertit un film de l'ancienne version (genre, univers…) vers les nouvelles catégories. */
+function convertOld(f,extraIds){
+  var t=f.tags||{},tags={histoire:(t.genre||[]).slice(),monde:(t.univers||[]).slice(),ambiance:(t.ambiance||[]).slice(),style:(t.style||[]).slice(),pays:[]};
+  (extraIds||[]).forEach(function(id){tags[id]=(t[id]||[]).slice();});
+  return {id:f.id,title:f.title,year:f.year,age:f.age==null?null:f.age,min:f.min||null,tags:tags,note:f.note||'',seen:!!f.seen};
+}
+/* Reporte des films d'une ancienne version sur la nouvelle liste d'origine : états « vu », remarques et âges conservés. */
+function mergeOld(d,oldFilms,extraIds,removed){
+  var byId={},byTitle={};
+  d.films.forEach(function(f){byId[f.id]=f;byTitle[norm(f.title)]=f;});
+  var rm={};(removed||[]).forEach(function(id){rm[id]=1;});
+  var extras=[],usedT={};
+  oldFilms.forEach(function(o){
+    var s=byId[o.id]||byTitle[norm(o.title)];
+    if(s){
+      s.seen=!!o.seen;
+      if(o.note)s.note=o.note;
+      if(o.age!=null)s.age=o.age;
+      (extraIds||[]).forEach(function(id){if(o.tags&&o.tags[id])s.tags[id]=o.tags[id].slice();});
+      return;
+    }
+    if(/^[fg]\d+$/.test(o.id)||usedT[norm(o.title)])return;
+    usedT[norm(o.title)]=1;
+    extras.push(convertOld(o,extraIds));
+  });
+  d.films=d.films.filter(function(f){return !rm[f.id];}).concat(extras);
+  migratedCount=extras.length;
+  return d;
+}
 function migrate(d){
-  var rev=d.seedRev||1;
-  if(rev>=3)return d;
-  if(rev<2){
-    var have={},ids={};
-    d.films.forEach(function(f){have[norm(f.title)]=1;ids[f.id]=1;});
-    SEED_FILMS_V2.forEach(function(r,i){
-      var id='g'+(i+1);
-      if(have[norm(r[0])]||ids[id])return;
-      d.films.push(mkFilm(r,id,d.criteria));addedCount++;
-    });
-  }
-  d.films.forEach(function(f){if(f.age===undefined)f.age=ageOfTitle(f.title);});
-  d.seedRev=3;migrated=true;return d;
+  if((d.seedRev||1)>=4)return d;
+  var extraCrit=d.criteria.filter(function(c){return OLD_IDS.indexOf(c.id)<0;});
+  var out=seedData();
+  out.criteria=out.criteria.concat(extraCrit);
+  out.films.forEach(function(f){extraCrit.forEach(function(c){f.tags[c.id]=[];});});
+  out.settings=d.settings;
+  mergeOld(out,d.films,extraCrit.map(function(c){return c.id;}),[]);
+  migrated=true;return out;
 }
 function normalize(d){
   if(!d||typeof d!=='object'||!Array.isArray(d.criteria)||!Array.isArray(d.films))return null;
   var cSeen={},criteria=[];
   d.criteria.forEach(function(c){
     if(!c||typeof c.label!=='string'||!Array.isArray(c.options))return;
-    var id=(typeof c.id==='string'&&c.id&&c.id!==ERA_ID&&c.id!==AGE_ID&&!cSeen[c.id])?c.id:uid('c');
+    var id=(typeof c.id==='string'&&c.id&&c.id!==ERA_ID&&c.id!==AGE_ID&&c.id!==DUR_ID&&!cSeen[c.id])?c.id:uid('c');
     cSeen[id]=1;
     var oSeen={},options=[];
     c.options.forEach(function(o){
@@ -468,7 +591,8 @@ function normalize(d){
     });
     var y=parseInt(f.year,10);
     var ag=(f.age===undefined)?undefined:(parseInt(f.age,10)>=0&&parseInt(f.age,10)<=18?parseInt(f.age,10):null);
-    films.push({id:id,title:f.title.trim(),year:(y>=1880&&y<=2100)?y:null,age:ag,tags:tags,
+    var mn=parseInt(f.min,10);
+    films.push({id:id,title:f.title.trim(),year:(y>=1880&&y<=2100)?y:null,age:ag,min:(mn>=1&&mn<=600)?mn:null,tags:tags,
       note:typeof f.note==='string'?f.note:'',seen:!!f.seen});
   });
   return {version:1,seedRev:parseInt(d.seedRev,10)||1,criteria:criteria,films:films,settings:{hideSeen:!(d.settings&&d.settings.hideSeen===false)}};
@@ -489,13 +613,18 @@ try{localStorage.setItem('__t','1');localStorage.removeItem('__t');}catch(e){sto
 
 var data=load();
 if(migrated)save();
-var tab='choose', sel={}, shown={}, editing=null, confirmKey=null, query='', backupText='';
+var tab='choose', sel={}, shown={}, editing=null, confirmKey=null, query='', backupText='', moreOpen=false;
 var current=null, rollTimer=null, endTimer=null, lastFocus=null, toastTimer=null;
 
-function allCrit(){return data.criteria.concat([ERA,AGE]);}
+function durOf(m){m=parseInt(m,10);if(!m)return null;return m<90?'court':(m<=120?'normal':'long');}
+function fmtMin(m){var h=Math.floor(m/60),r=m%60;return h?(h+' h'+(r?' '+(r<10?'0':'')+r:'')):(r+' min');}
+function allCrit(){return [AGE].concat(data.criteria,[ERA,DUR]);}
+function mainCrit(){return [AGE].concat(data.criteria.filter(function(c){return ESSENTIAL.indexOf(c.id)>-1;}));}
+function moreCrit(){return data.criteria.filter(function(c){return ESSENTIAL.indexOf(c.id)<0;}).concat([ERA,DUR]);}
 function filmHas(f,cid,oid){
   if(cid===ERA_ID)return eraOf(f.year)===oid;
   if(cid===AGE_ID)return f.age!=null&&f.age<=parseInt(oid.slice(1),10);
+  if(cid===DUR_ID)return durOf(f.min)===oid;
   return (f.tags[cid]||[]).indexOf(oid)>-1;
 }
 function matches(f,s){for(var k in s){if(!filmHas(f,k,s[k]))return false;}return true;}
@@ -507,6 +636,7 @@ function filmTags(f){
   allCrit().forEach(function(c,i){
     if(c.id===ERA_ID){var e=eraOf(f.year);if(e)out.push({i:i,label:optOf(ERA,e).short});}
     else if(c.id===AGE_ID){if(f.age!=null)out.push({i:i,label:'Dès '+f.age+' ans'});}
+    else if(c.id===DUR_ID){var d=durOf(f.min);if(d)out.push({i:i,label:optOf(DUR,d).short});}
     else (f.tags[c.id]||[]).forEach(function(oid){var o=optOf(c,oid);if(o)out.push({i:i,label:o.short||o.label});});
   });
   return out;
@@ -552,18 +682,27 @@ function renderChoose(){
   var list=eligible();
   var total=list.filter(function(f){return matches(f,sel);}).length;
   var seenCount=data.films.filter(function(f){return f.seen;}).length;
-  var h='<p class="hint">Posez une question aux enfants, touchez leur réponse, puis tirez un film. Un seul critère suffit. Le nombre sur chaque réponse indique combien de films restent possibles.</p>';
-  allCrit().forEach(function(c,i){
-    h+='<section class="crit" style="--cc:var(--c'+(i%6)+')"><h2 class="q"><span class="dot" aria-hidden="true"></span>'+esc(c.label)+'</h2><div class="chips" role="group" aria-label="'+esc(c.label)+'">';
+  var h='<p class="hint">Commencez par l\'âge du plus jeune, puis posez une question aux enfants, touchez leur réponse et tirez un film. Un seul critère suffit ; « Affiner la recherche » ajoute le style, le pays, l\'époque et la durée. Le nombre sur chaque réponse indique combien de films restent possibles.</p>';
+  var all=allCrit();
+  function critHtml(c){
+    var i=all.indexOf(c),t='';
+    t+='<section class="crit" style="--cc:var(--c'+(i%6)+')"><h2 class="q"><span class="dot" aria-hidden="true"></span>'+esc(c.label)+'</h2><div class="chips" role="group" aria-label="'+esc(c.label)+'">';
     c.options.forEach(function(o){
       var on=sel[c.id]===o.id;
       var s2=Object.assign({},sel);s2[c.id]=o.id;
       var n=list.filter(function(f){return matches(f,s2);}).length;
       var dis=!on&&n===0;
-      h+='<button type="button" class="chip" data-act="pick" data-c="'+esc(c.id)+'" data-o="'+esc(o.id)+'" aria-pressed="'+on+'"'+(dis?' aria-disabled="true"':'')+'><span>'+esc(o.label)+'</span><span class="n">'+n+'</span></button>';
+      t+='<button type="button" class="chip" data-act="pick" data-c="'+esc(c.id)+'" data-o="'+esc(o.id)+'" aria-pressed="'+on+'"'+(dis?' aria-disabled="true"':'')+'><span>'+esc(o.label)+'</span><span class="n">'+n+'</span></button>';
     });
-    h+='</div></section>';
-  });
+    return t+'</div></section>';
+  }
+  mainCrit().forEach(function(c){h+=critHtml(c);});
+  var more=moreCrit(),moreSel=more.filter(function(c){return sel[c.id];}).length;
+  var open=moreOpen||moreSel>0;
+  h+='<button type="button" class="btn more" data-act="more" aria-expanded="'+open+'" aria-controls="moresec"><span>Affiner la recherche</span><span>'+(moreSel?'<span class="n">'+moreSel+' choisi'+(moreSel>1?'s':'')+'</span> ':'')+(open?'▴':'▾')+'</span></button>';
+  h+='<div id="moresec" class="moresec"'+(open?'':' hidden')+'>';
+  if(open)more.forEach(function(c){h+=critHtml(c);});
+  h+='</div>';
   h+='<label class="switch" for="hideSeen"><input type="checkbox" id="hideSeen"'+(data.settings.hideSeen?' checked':'')+'><span>Ne pas reproposer les films déjà vus'+(seenCount?' <span class="muted">('+seenCount+' vu'+(seenCount>1?'s':'')+')</span>':'')+'</span></label>';
   h+='<div class="bar"><div class="bar-info">'+(total?'<span class="big">'+total+'</span>film'+(total>1?'s':'')+' possible'+(total>1?'s':''):'Aucun film ne correspond')+'</div><div class="bar-act">'+(hasSel()?'<button type="button" class="btn" data-act="clear">Effacer</button>':'')+'<button type="button" class="btn primary" data-act="draw"'+(total?'':' disabled')+'>Tirer un film</button></div></div>';
   el.innerHTML=h;
@@ -587,7 +726,7 @@ function draw(){
 function ticketHtml(f,note){
   var tags=filmTags(f).map(function(t){return '<span class="pill" style="--cc:var(--c'+(t.i%6)+')">'+esc(t.label)+'</span>';}).join('');
   var e=eraOf(f.year);
-  var meta=(f.year?f.year:'Année inconnue')+(e?' · '+optOf(ERA,e).short:'');
+  var meta=(f.year?f.year:'Année inconnue')+(e?' · '+optOf(ERA,e).short:'')+(f.min?' · '+fmtMin(f.min):'');
   return '<div class="ticket is-rolling">'+
     '<div class="t-band"><span>Une place · Séance du soir</span><button type="button" class="t-close" data-act="close" aria-label="Fermer">×</button></div>'+
     '<div class="t-main"><div class="t-kicker">Votre film</div><h2 class="t-title" id="tTitle">'+esc(f.title)+'</h2><div class="t-meta">'+esc(meta)+'</div></div>'+
@@ -658,13 +797,18 @@ function eraHint(y){
   var e=eraOf(y);
   return e?'Époque : « '+optOf(ERA,e).label+' »':'Sans année valide, ce film ne sera pas proposé quand on choisit une époque.';
 }
+function durHint(m){
+  var k=durOf(m);
+  return k?'Durée : « '+optOf(DUR,k).label+' »':'Sans durée, ce film ne sera pas proposé quand on choisit une durée.';
+}
 function formHtml(){
   var d=editing.draft;
   var h='<form class="form" id="filmForm" novalidate><h2>'+(editing.id?'Modifier le film':'Ajouter un film')+'</h2>'+
     '<div class="row2"><div class="field"><label class="lab" for="f-title">Titre</label><input class="in" id="f-title" type="text" value="'+esc(d.title)+'" autocomplete="off"></div>'+
     '<div class="field"><label class="lab" for="f-year">Année</label><input class="in" id="f-year" type="number" inputmode="numeric" min="1880" max="2100" value="'+esc(d.year)+'"></div></div>'+
     '<p class="note-line" id="eraHint">'+esc(eraHint(d.year))+'</p>'+
-    '<div class="field"><label class="lab" for="f-age">Âge minimum conseillé (en années)</label><input class="in" id="f-age" type="number" inputmode="numeric" min="0" max="18" value="'+esc(d.age)+'" style="max-width:160px"><p class="note-line">Le film est proposé quand l\'âge choisi est égal ou supérieur. Sans âge, il n\'apparaît pas quand on filtre par âge.</p></div>';
+    '<div class="field"><label class="lab" for="f-age">Âge minimum conseillé (en années)</label><input class="in" id="f-age" type="number" inputmode="numeric" min="0" max="18" value="'+esc(d.age)+'" style="max-width:160px"><p class="note-line">Le film est proposé quand l\'âge choisi est égal ou supérieur. Sans âge, il n\'apparaît pas quand on filtre par âge.</p></div>'+
+    '<div class="field"><label class="lab" for="f-min">Durée (en minutes)</label><input class="in" id="f-min" type="number" inputmode="numeric" min="1" max="600" value="'+esc(d.min)+'" style="max-width:160px"><p class="note-line" id="durHint">'+esc(durHint(d.min))+'</p></div>';
   data.criteria.forEach(function(c,i){
     h+='<div class="field crit" style="--cc:var(--c'+(i%6)+');margin:0"><span class="lab">'+esc(c.label)+' <span class="muted">(plusieurs réponses possibles)</span></span><div class="chips" role="group" aria-label="'+esc(c.label)+'">';
     c.options.forEach(function(o){
@@ -673,7 +817,7 @@ function formHtml(){
     });
     h+='</div></div>';
   });
-  h+='<div class="field"><label class="lab" for="f-note">Remarque (facultatif)</label><textarea class="in" id="f-note" placeholder="Résumé en une phrase, âge conseillé, durée…">'+esc(d.note)+'</textarea></div>'+
+  h+='<div class="field"><label class="lab" for="f-note">Remarque (facultatif)</label><textarea class="in" id="f-note" placeholder="Résumé en une phrase, remarque pour la prochaine séance…">'+esc(d.note)+'</textarea></div>'+
     '<label class="switch" for="f-seen"><input type="checkbox" id="f-seen"'+(d.seen?' checked':'')+'><span>Déjà vu</span></label>'+
     '<p class="err" id="formErr" role="alert"></p>'+
     '<div class="form-act"><button type="button" class="btn primary" data-act="save">Enregistrer</button><button type="button" class="btn" data-act="cancel">Annuler</button></div></form>';
@@ -683,7 +827,7 @@ function startEdit(id){
   var f=id?data.films.filter(function(x){return x.id===id;})[0]:null;
   var tags={};
   data.criteria.forEach(function(c){tags[c.id]=f?(f.tags[c.id]||[]).slice():[];});
-  editing={id:f?f.id:null,draft:{title:f?f.title:'',year:f&&f.year?String(f.year):'',age:f&&f.age!=null?String(f.age):'',note:f?f.note:'',seen:f?f.seen:false,tags:tags}};
+  editing={id:f?f.id:null,draft:{title:f?f.title:'',year:f&&f.year?String(f.year):'',age:f&&f.age!=null?String(f.age):'',min:f&&f.min?String(f.min):'',note:f?f.note:'',seen:f?f.seen:false,tags:tags}};
   renderFilms();
   var t=$('#f-title');if(t)t.focus();
   window.scrollTo(0,0);
@@ -702,7 +846,12 @@ function saveFilm(){
     ag=parseInt(d.age,10);
     if(!(ag>=0&&ag<=18)){err.textContent='L\'âge doit être compris entre 0 et 18.';$('#f-age').focus();return;}
   }
-  var obj={title:title,year:y,age:ag,tags:d.tags,note:d.note.trim(),seen:d.seen};
+  var mn=null;
+  if(String(d.min).trim()!==''){
+    mn=parseInt(d.min,10);
+    if(!(mn>=1&&mn<=600)){err.textContent='La durée doit être comprise entre 1 et 600 minutes.';$('#f-min').focus();return;}
+  }
+  var obj={title:title,min:mn,year:y,age:ag,tags:d.tags,note:d.note.trim(),seen:d.seen};
   if(editing.id){
     var f=data.films.filter(function(x){return x.id===editing.id;})[0];
     Object.assign(f,obj);
@@ -717,7 +866,7 @@ function renderSettings(){
   var el=$('#panel-settings');
   var h='';
   if(!storageOK)h+='<p class="warn" role="alert">Ce navigateur ne peut pas enregistrer la liste. Copiez la sauvegarde plus bas pour ne rien perdre.</p>';
-  h+='<section class="sect"><h2>Critères</h2><p class="muted">Ce sont les questions posées aux enfants. Vous pouvez reformuler, ajouter ou retirer des réponses. Retirer une réponse la supprime aussi des films concernés.</p>';
+  h+='<section class="sect"><h2>Critères</h2><p class="muted">Ce sont les questions posées aux enfants (les quatre premières, puis, sous « Affiner la recherche », le style et le pays d\'origine). Vous pouvez reformuler, ajouter ou retirer des réponses. Retirer une réponse la supprime aussi des films concernés.</p>';
   data.criteria.forEach(function(c,i){
     var ck='cdel:'+c.id,carm=confirmKey===ck;
     h+='<div class="card crit" style="--cc:var(--c'+(i%6)+');margin:0"><div class="field"><label class="lab" for="cl-'+esc(c.id)+'">Question</label><input class="in" id="cl-'+esc(c.id)+'" data-act="clabel" data-c="'+esc(c.id)+'" value="'+esc(c.label)+'"></div><ul class="opts">';
@@ -730,6 +879,7 @@ function renderSettings(){
   });
   h+='<div class="card"><h3>À quelle époque ?</h3><p class="muted">Ce critère se calcule tout seul avec l\'année du film : avant 1960, 1960 à 1979, 1980 à 1999, 2000 à 2009, 2010 à 2019, 2020 et après. Une année pile (par exemple 2000) va dans la tranche qui commence cette année-là.</p></div>';
   h+='<div class="card"><h3>Quel âge ont les enfants ?</h3><p class="muted">Ce critère se règle avec l\'âge minimum conseillé de chaque film (champ « Âge » dans l\'onglet Films). Si vous choisissez 10 ans, l\'appli propose les films conseillés dès 10 ans ou moins. Les âges de départ sont des estimations : corrigez-les selon votre avis.</p></div>';
+  h+='<div class="card"><h3>Quelle durée ?</h3><p class="muted">Ce critère se calcule avec la durée de chaque film (champ « Durée » dans l\'onglet Films) : court en dessous de 1 h 30, durée normale de 1 h 30 à 2 h, long au-dessus de 2 h.</p></div>';
   h+='<div class="card"><h3>Nouveau critère</h3><div class="field"><label class="lab" for="nc-label">Question</label><input class="in" id="nc-label" placeholder="Par exemple : Quelle durée ?"></div><div class="field"><label class="lab" for="nc-opts">Réponses (une par ligne)</label><textarea class="in" id="nc-opts" placeholder="Un film court&#10;Un film long"></textarea></div><p class="err" id="ncErr" role="alert"></p><div><button type="button" class="btn small" data-act="cadd">Ajouter le critère</button></div></div></section>';
   h+='<section class="sect"><h2>Sauvegarde</h2><p class="muted">La liste est enregistrée dans ce navigateur. Pour la garder ailleurs ou la passer sur un autre appareil, copiez le texte de sauvegarde, puis collez-le là-bas. La <strong>sauvegarde légère</strong> ne garde que vos changements (films ajoutés, retirés, modifiés, vus) : le texte est court et passe dans une appli de notes. La sauvegarde complète contient tous les films et peut être trop longue.</p>'+
     '<div class="field"><label class="lab" for="backup">Texte de sauvegarde</label><textarea class="in" id="backup" spellcheck="false" placeholder="Appuyez sur « Copier la sauvegarde », ou collez ici une sauvegarde à importer.">'+esc(backupText)+'</textarea></div>'+
@@ -743,13 +893,13 @@ function renderSettings(){
 /* ---------- sauvegarde légère : seulement les écarts avec la liste d'origine ---------- */
 function filmSig(f){
   var t={};Object.keys(f.tags||{}).sort().forEach(function(k){t[k]=(f.tags[k]||[]).slice().sort();});
-  return JSON.stringify([f.title,f.year,f.age==null?null:f.age,f.note||'',!!f.seen,t]);
+  return JSON.stringify([f.title,f.year,f.age==null?null:f.age,f.min||null,f.note||'',!!f.seen,t]);
 }
 function lightBackup(){
   var seed=seedData(),sf={},cur={};
   seed.films.forEach(function(f){sf[f.id]=f;});
   data.films.forEach(function(f){cur[f.id]=1;});
-  var out={light:1,seedRev:3,settings:data.settings,removed:[],changed:[],added:[]};
+  var out={light:1,seedRev:4,settings:data.settings,removed:[],changed:[],added:[]};
   if(JSON.stringify(data.criteria)!==JSON.stringify(seed.criteria))out.criteria=data.criteria;
   seed.films.forEach(function(f){if(!cur[f.id])out.removed.push(f.id);});
   data.films.forEach(function(f){
@@ -761,13 +911,26 @@ function lightBackup(){
 }
 function applyLight(L){
   var d=seedData();
+  if((L.seedRev||1)<4){
+    var oldCrit=Array.isArray(L.criteria)?L.criteria.filter(function(c){return c&&OLD_IDS.indexOf(c.id)<0&&typeof c.label==='string'&&Array.isArray(c.options);}):[];
+    var xid=oldCrit.map(function(c){return c.id;});
+    d.criteria=d.criteria.concat(oldCrit);
+    d.films.forEach(function(f){xid.forEach(function(id){f.tags[id]=[];});});
+    if(L.settings)d.settings=L.settings;
+    var olds=(L.changed||[]).concat(L.added||[]).filter(function(f){return f&&f.title;});
+    mergeOld(d,olds,xid,L.removed);
+    migrated=true;
+    var n0=normalize(d);
+    if(!n0)throw new Error('light');
+    n0.seedRev=4;return n0;
+  }
   if(Array.isArray(L.criteria))d.criteria=L.criteria;
   var rm={},ch={};
   (L.removed||[]).forEach(function(id){rm[id]=1;});
   (L.changed||[]).forEach(function(f){if(f&&f.id)ch[f.id]=f;});
   d.films=d.films.filter(function(f){return !rm[f.id];}).map(function(f){return ch[f.id]||f;}).concat(L.added||[]);
   if(L.settings)d.settings=L.settings;
-  d.seedRev=3;
+  d.seedRev=4;
   var n=normalize(d);
   if(!n)throw new Error('light');
   return n;
@@ -798,6 +961,7 @@ document.addEventListener('click',function(e){
     if(sel[c]===o)delete sel[c];else sel[c]=o;
     shown={};renderChoose();refocus(k);return;
   }
+  if(act==='more'){moreOpen=!(moreOpen||Object.keys(sel).some(function(k){return k!==AGE_ID&&ESSENTIAL.indexOf(k)<0;}));renderChoose();refocus(k);return;}
   if(act==='clear'){sel={};shown={};renderChoose();var d=$('[data-act="draw"]');if(d)d.focus({preventScroll:true});return;}
   if(act==='draw'){draw();return;}
   if(act==='again'){draw();return;}
@@ -906,7 +1070,7 @@ document.addEventListener('click',function(e){
     }
     if(!parsed){confirmKey=null;renderSettings();toast(perr||'Ce texte n\'est pas une sauvegarde valide.');return;}
     if(confirmKey==='import'){
-      data=parsed;sel={};shown={};confirmKey=null;backupText='';save();renderSettings();toast('Sauvegarde importée');
+      data=parsed;sel={};shown={};confirmKey=null;backupText='';save();renderSettings();toast(migrated?'Ancienne sauvegarde importée et convertie aux nouvelles catégories':'Sauvegarde importée');migrated=false;
     }else{confirmKey='import';renderSettings();refocus(k);}
     return;
   }
@@ -925,6 +1089,7 @@ document.addEventListener('input',function(e){
   if(t.id==='f-title')editing.draft.title=t.value;
   else if(t.id==='f-year'){editing.draft.year=t.value;$('#eraHint').textContent=eraHint(t.value);}
   else if(t.id==='f-age')editing.draft.age=t.value;
+  else if(t.id==='f-min'){editing.draft.min=t.value;$('#durHint').textContent=durHint(t.value);}
   else if(t.id==='f-note')editing.draft.note=t.value;
   else if(t.id==='backup')backupText=t.value;
 });
@@ -970,7 +1135,7 @@ document.addEventListener('keydown',function(e){
 });
 
 showTab('choose');
-if(migrated)toast(addedCount>0?addedCount+' films ajoutés, avec un âge conseillé estimé':'Filtre d\'âge ajouté : âges estimés, à vérifier');
+if(migrated)toast('Nouvelle version : catégories refondues, pays et durées ajoutés. Vos films déjà vus sont conservés.');
 })();
 </script>
 <script>

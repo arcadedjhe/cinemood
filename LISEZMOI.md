@@ -1,6 +1,6 @@
 # CinéMood
 
-Application web installable pour choisir un film pour les enfants (genre, univers, ambiance, style, époque, âge).
+Application web installable pour choisir un film pour les enfants (âge, histoire, monde, ambiance, puis style, pays d'origine, époque et durée).
 Elle fonctionne hors ligne une fois installée. Les données (liste de films, critères, films vus) sont enregistrées dans le navigateur de l'appareil.
 
 ## Publier sur GitHub Pages
@@ -16,4 +16,4 @@ Ouvrez l'adresse dans Chrome, menu (trois points), « Installer l'application »
 
 ## Mettre à jour
 
-Remplacez les fichiers dans le dépôt. Changez aussi la ligne `const VERSION = 'cinemood-v1'` dans `sw.js` (par exemple `cinemood-v2`) pour que les téléphones récupèrent la nouvelle version.
+Remplacez les fichiers dans le dépôt. Changez aussi la ligne `const VERSION = 'cinemood-v4'` dans `sw.js` (par exemple `cinemood-v5`) pour que les téléphones récupèrent la nouvelle version.
